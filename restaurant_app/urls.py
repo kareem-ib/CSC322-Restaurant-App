@@ -20,4 +20,3 @@ urlpatterns = [
     path('restaurant/', include('restaurant.urls')),
     path('admin/', admin.site.urls),
 ]
-# print(include('restaurant.urls'))
