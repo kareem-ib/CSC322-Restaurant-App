@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
 <body bgcolor="#D3D3D3">
-  <a href="./Main_Page.html">Home Page</a>
-  <a href="./About.html">About</a>
-  <a href="./Menu.html">Menu</a>
-  <a href="./Register.html">Register</a>
-  <a href="./Complaint_Compliment.html">File a Complaint or Compliment</a>
-  <a href="./Deposit.html">Make a Deposit</a>
-  <a href="./Discussion_Board.html">Discussion Board</a>
+  <a href="/restaurant/home">Home Page</a>
+  <a href="/restaurant/about">About</a>
+  <a href="/restaurant/menu">Menu</a>
+  <a href="/restaurant/register">Register</a>
+  <a href="/restaurant/complaint_compliment">File a Complaint or Compliment</a>
+  <a href="/restaurant/deposit">Make a Deposit</a>
+  <a href="/restaurant/discussion_board">Discussion Board</a>
   <header>
     <h1>Welcome to the Discussion Board!</h1>
     <br>
     <h3>Remember to refrain from using taboo words.</h3>
-    <a href="./Make_Post.html">Make a Post</a>
+    <a href="/restaurant/make_post">Make a Post</a>
   </header>
   <main>
     <p>Posts would go in the area below</p>
     {% for post in posts %}
       <h1>{{ post.title }}</h1>
       <p>By {{ post.author }} on {{ post.date_posted }}</p>
+      <p>{{ post.content }}</p>
     {% endfor %}
   </main>
 </body>

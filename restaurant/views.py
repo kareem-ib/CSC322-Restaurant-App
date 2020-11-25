@@ -39,7 +39,10 @@ def discussion_board(request):
     return render(request, 'restaurant/discussion_board.html', context)
 
 def home(request):
-    return render(request, 'restaurant/home.html')
+    return render(request, 'restaurant/main_page.html')
+
+def make_post(request):
+    return render(request, 'restaurant/make_post.html')
 
 def menu(request):
     # user's personalized dishes go here
