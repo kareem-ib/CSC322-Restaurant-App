@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body bgcolor="#D3D3D3">
+  <a href="./Main_Page.html">Home Page</a>
+  <a href="./About.html">About</a>
+  <a href="./Menu.html">Menu</a>
+  <a href="./Register.html">Register</a>
+  <a href="./Complaint_Compliment.html">File a Complaint or Compliment</a>
+  <a href="./Deposit.html">Make a Deposit</a>
+  <a href="./Discussion_Board.html">Discussion Board</a>
+  <header>
+    <h1>Create a Post</h1>
+    <br>
+    <h4>Remember to refrain from using taboo words.</h4>
+  </header>
+  <main>
+    <label for="title">Post Title: </label>
+    <input type="text" id="title" name="title" size="50">
+    <br>
+    <label for="post">Post Text: </label>
+    <br>
+    <textarea type="text" id="post" name="post" rows="20" cols="100">
+    </textarea>
+    <br>
+    <input type="submit" value="Send" onclick="submitted()">
+    <p id="submitted_text" style="display:hidden"></p>
+
+  </main>
+  <script>
+    function submitted() {
+      console.log('agsffwewf')
+      document.getElementById('submitted_text').display = 'block';
+      document.getElementById('submitted_text').innerHTML = 'Your post has been posted to the discussion board, cutie.';
+    }
+  </script>
+</body>
+</html>
