@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from restaurant import views as user_views
 
 from . import views
@@ -13,5 +14,9 @@ urlpatterns = [
     path('make_post/', views.make_post, name='make_post'),
     path('menu/', views.menu, name='menu'),
     path('register/', user_views.register, name='register'),
-    path('login/', views.login, name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='restaurant/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='restaurant/logout.html'), name='logout'),
+    path('profile/', user_views.profile, name='profile'),
+    path('report/', user_views.report, name='report'),
+    path('dispute/', user_views.dispute, name='dispute'),
 ]

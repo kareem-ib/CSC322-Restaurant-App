@@ -3,6 +3,7 @@ from django.http import HttpResponse
 #from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm
+from django.contrib.auth.decorators import login_required
 
 posts = [
     {
@@ -28,9 +29,11 @@ def about(request):
     return render(request, 'restaurant/about.html')
     #return HttpResponse('About Page')
 
+@login_required
 def complaint_compliment(request):
     return render(request, 'restaurant/complaint_compliment.html')
 
+@login_required
 def deposit(request):
     # user's current balance goes here
     return render(request, 'restaurant/deposit.html')
@@ -47,6 +50,7 @@ def home(request):
 def login(request):
     return render(request, 'restaurant/login.html')
 
+@login_required
 def make_post(request):
     return render(request, 'restaurant/make_post.html')
 
@@ -61,8 +65,20 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, "Your account has been created!")
-            return redirect('home')
+            messages.success(request, "Your account has been created! Please log in.")
+            return redirect('login')
     else:
         form = UserRegisterForm()
     return render(request, 'restaurant/register.html', {'form': form})
+
+@login_required
+def profile(request):
+    return render(request, 'restaurant/profile.html')
+
+@login_required
+def report(request):
+    return render(request, 'restaurant/report.html')
+
+@login_required
+def dispute(request):
+    return render(request, 'restaurant/dispute.html')
