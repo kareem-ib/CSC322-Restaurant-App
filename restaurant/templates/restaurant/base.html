@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="{% static 'restaurant/base.css' %}"
+  <link rel="stylesheet" type="text/css" href="{% static 'restaurant/base.css' %}" />
   <title>Los Tres Locos</title>
 </head>
 <body>
@@ -21,6 +21,9 @@
               <a class="nav-item nav-link" href="{% url 'home' %}">Home</a>
               <a class="nav-item nav-link" href="{% url 'about' %}">About</a>
               <a class="nav-item nav-link" href="{% url 'discussion_board' %}">Discussion Board</a>
+              <a class="nav-item nav-link" href="{% url 'menu' %}">Menu</a>
+              <a class="nav-item nav-link" href="{% url 'complaint_compliment' %}">Make a Complaint or Compliment</a>
+              <a class="nav-item nav-link" href="{% url 'deposit' %}">Deposit</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
