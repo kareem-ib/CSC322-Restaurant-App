@@ -1,4 +1,5 @@
 from django.urls import path
+from restaurant import views as user_views
 
 from . import views
 
@@ -11,5 +12,6 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('make_post/', views.make_post, name='make_post'),
     path('menu/', views.menu, name='menu'),
-    path('register/', views.register, name='register')
+    path('register/', user_views.register, name='register'),
+    path('login/', views.login, name='login'),
 ]

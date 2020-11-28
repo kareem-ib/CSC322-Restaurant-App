@@ -1,36 +1,19 @@
-<!DOCTYPE html>
-<html>
-<body bgcolor="#D3D3D3">
-  <a href="./Main_Page.html">Home Page</a>
-  <a href="./About.html">About</a>
-  <a href="./Menu.html">Menu</a>
-  <a href="./Register.html">Register</a>
-  <a href="./Complaint_Compliment.html">File a Complaint or Compliment</a>
-  <a href="./Deposit.html">Make a Deposit</a>
-  <a href="./Discussion_Board.html">Discussion Board</a>
-  <header>
-    <h1>Become a Registered Customer</h1>
-  </header>
-  <label for="name">Name: </label>
-  <br>
-  <input type="text" id="name" name="name">
-  <br>
-  <label for="password">Password: </label>
-  <br>
-  <input type="password" id="password" name="password">
-  <br>
-  <label for="email">Email: </label>
-  <br>
-  <input type="email" id="email" name="email">
-  <br>
-  <input type="submit" value="Send" onclick="submitted()">
-  <p id="submitted_text" style="display:hidden"></p>
-
-  <script>
-    function submitted() {
-      document.getElementById('submitted_text').display = 'block';
-      document.getElementById('submitted_text').innerHTML = 'You have submitted, cutie.';
-    }
-  </script>
-</body>
-</html>
+{% extends 'restaurant/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <div class="content-section">
+      <form method="POST">
+        {% csrf_token %}
+        <fieldset class="form-group">
+          <legend class="border-bottom mb-4">Become a Registered Customer!</legend>
+          {{ form|crispy }}
+        </fieldset>
+        <div class="form-group">
+          <button class="btn btn-dark" type="submit">Submit</button>
+        </div>
+      </form>
+      <div class="border-top pt-3">
+        <small class="text-muted">Already a registered customer? <a href="{% url 'login' %}">Log In</a></small>
+      </div>
+  </div>
+{% endblock content %}
