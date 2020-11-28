@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html>
-<body bgcolor="#D3D3D3">
-  <a href="./Main_Page.html">Home Page</a>
-  <a href="./About.html">About</a>
-  <a href="./Menu.html">Menu</a>
-  <a href="./Register.html">Register</a>
-  <a href="./Complaint_Compliment.html">File a Complaint or Compliment</a>
-  <a href="./Deposit.html">Make a Deposit</a>
-  <a href="./Discussion_Board.html">Discussion Board</a>
+{% extends 'restaurant/base.html' %}
+{% block content %}
   <header>
     <h1>Create a Post</h1>
     <br>
@@ -28,10 +20,8 @@
   </main>
   <script>
     function submitted() {
-      console.log('agsffwewf')
       document.getElementById('submitted_text').display = 'block';
       document.getElementById('submitted_text').innerHTML = 'Your post has been posted to the discussion board, cutie.';
     }
   </script>
-</body>
-</html>
+{% endblock content %}

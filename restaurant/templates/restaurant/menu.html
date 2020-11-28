@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel='stylesheet' type='text/css' href='menu_style.css' />
-</head>
-<body bgcolor="#D3D3D3">
-  <a href="./Main_Page.html">Home Page</a>
-  <a href="./About.html">About</a>
-  <a href="./Menu.html">Menu</a>
-  <a href="./Register.html">Register</a>
-  <a href="./Complaint_Compliment.html">File a Complaint or Compliment</a>
-  <a href="./Deposit.html">Make a Deposit</a>
-  <a href="./Discussion_Board.html">Discussion Board</a>
+{% extends 'restaurant/base.html' %}
+{% block content %}
   <div class="container">
     <header>
     <main>
@@ -80,5 +69,4 @@
       </div>
     </main>
   </div>
-</body>
-</html>
+{% endblock content %}

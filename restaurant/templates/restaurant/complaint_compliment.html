@@ -1,4 +1,44 @@
-<!DOCTYPE html>
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  <header>
+    <h1>Make a Complaint or Compliment</h1>
+  </header>
+  <label for="c_type">Choose what you want to file</label>
+  <input list="c_types" name="c_type" id="c_type">
+  <datalist id="c_types" name="c_type" size="3">
+    <option value="Complaint">Complaint</option>
+    <option value="Compliment">Compliment</option>
+  </datalist>
+  <br>
+  <label for="staff_type">Choose whether you want to file a complaint or compliment for a chef or delivery person</label>
+  <input list="staff_types" name="staff_type" id="staff_type">
+  <datalist id="staff_types" name="staff_type" size="3">
+    <option value="Chef">Chef</option>
+    <option value="Delivery Person">Delivery Person</option>
+  </datalist>
+  <br>
+  <label for="name">Name: </label>
+  <br>
+  <input type="text" id="name" name="name">
+  <br>
+  <label for="reason">Reason: </label>
+  <br>
+  <textarea type="text" id="reason" name="reason" rows="10" cols="100">
+  </textarea>
+  <br>
+  <input type="submit" value="Send" onclick="submitted()">
+  <p id="submitted_text" style="display:hidden"></p>
+
+  <script>
+    function submitted() {
+      console.log('agsffwewf')
+      document.getElementById('submitted_text').display = 'block';
+      document.getElementById('submitted_text').innerHTML = 'Your response has been sent to the manager.';
+    }
+  </script>
+{% endblock content %}
+
+<!--<!DOCTYPE html>
 <html>
 <body bgcolor="#D3D3D3">
   <a href="./Main_Page.html">Home Page</a>
@@ -45,4 +85,4 @@
     }
   </script>
 </body>
-</html>
+</html>-->
