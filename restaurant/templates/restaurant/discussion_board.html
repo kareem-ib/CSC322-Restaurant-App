@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html>
-<body bgcolor="#D3D3D3">
-  <a href="/restaurant/home">Home Page</a>
-  <a href="/restaurant/about">About</a>
-  <a href="/restaurant/menu">Menu</a>
-  <a href="/restaurant/register">Register</a>
-  <a href="/restaurant/complaint_compliment">File a Complaint or Compliment</a>
-  <a href="/restaurant/deposit">Make a Deposit</a>
-  <a href="/restaurant/discussion_board">Discussion Board</a>
-  <header>
-    <h1>Welcome to the Discussion Board!</h1>
-    <br>
-    <h3>Remember to refrain from using taboo words.</h3>
-    <a href="/restaurant/make_post">Make a Post</a>
-  </header>
-  <main>
-    <p>Posts would go in the area below</p>
-    {% for post in posts %}
-      <h1>{{ post.title }}</h1>
-      <p>By {{ post.author }} on {{ post.date_posted }}</p>
-      <p>{{ post.content }}</p>
-    {% endfor %}
-  </main>
-</body>
-</html>
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  {% for post in posts %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">{{ post.author }}</a>
+          <small class="text-muted">{{ post.date_posted }}</small>
+        </div>
+        <h2><a class="article-title" href="#">{{ post.title }}</a></h2>
+        <p class="article-content">{{ post.content }}</p>
+      </div>
+    </article>
+  {% endfor %}
+{% endblock content %}

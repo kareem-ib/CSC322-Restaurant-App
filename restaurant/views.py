@@ -18,8 +18,8 @@ posts = [
 
 # Create your views here.
 def index(request):
-    return HttpResponse('Welcome to the restaurant')
-    #return render(request, './About.html')
+    #return HttpResponse('Welcome to the restaurant')
+    return render(request, 'restaurant/index.html')
 
 def about(request):
     return render(request, 'restaurant/about.html')
