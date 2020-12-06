@@ -1,27 +1,24 @@
 {% extends 'restaurant/base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
-  <header>
-    <h1>Make a Deposit</h1>
-  </header>
-  <p>Balance:</p>
-  <p id="total">$0</p>
-  <label for="amount">Amount: </label>
-  <br>
-  <input type="text" id="amount" name="amount">
-  <br>
-  <label for="card">Card Number: </label>
-  <br>
-  <input type="password" id="card" name="card">
-  <br>
-  <input type="submit" value="Send" onclick="submitted()">
-  <p id="submitted_text" style="display:hidden"></p>
-
-  <script>
-    function submitted() {
-      console.log('agsffwewf')
-      document.getElementById('submitted_text').display = 'block';
-      document.getElementById('submitted_text').innerHTML = 'You have placed a deposit, cutie.';
-      document.getElementById('total').innerHTML = '$' + (parseInt(document.getElementById('amount').value) + parseInt(document.getElementById('total').innerHTML.substring(1)))
-    }
-  </script>
+  <div class="content-section">
+    <form method="POST">
+      {% csrf_token %}
+      <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Make a Deposit</legend>
+        <h6>Current Balance: ${{ balance }}</h6>
+        {{ form|crispy }}
+      </fieldset>
+      <!--<label for="amount">Amount: </label>
+      <br>
+      <input type="text" id="amount" name="amount">
+      <br>
+      <label for="card">Card Number: </label>
+      <br>
+      <input type="password" id="card" name="card">
+      <br>-->
+      <input type="submit" value="Send">
+      <p id="submitted_text" style="display:hidden"></p>
+    </form>
+  </div>
 {% endblock content %}

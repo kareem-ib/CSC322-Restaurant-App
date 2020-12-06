@@ -13,7 +13,7 @@ class Staff(User):
     class Types(models.TextChoices):
         CHEF = 'CHEF', 'Chef'
         DP = 'DP', 'Delivery Person'
-    
+
     type = models.CharField(_('Type'), max_length=50, choices=Types.choices)
     # Might end up just using 1, + compliments, 0 equal, - complaints
     complaints = models.IntegerField(default=0)
@@ -42,6 +42,7 @@ class DeliveryPerson(Staff):
 
 class Deposits(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     class PaymentType(models.TextChoices):
         CARD = 'CARD', _('Credit Card')
@@ -112,4 +113,3 @@ class UnproccessedComplaints(models.Model):
             return DeliveryPerson.objects.get(pk=self.complainee_id)
         else:
             return Chef.objects.get(pk=self.complainee_id)
-

@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 #from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, DepositForm
 from django.contrib.auth.decorators import login_required
+from .models import Customers
 
 posts = [
     {
@@ -35,8 +36,25 @@ def complaint_compliment(request):
 
 @login_required
 def deposit(request):
+    customer = Customers.objects.get(pk=request.user.id)
+    if request.method == 'POST':
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            #customer.update(balance=customer.balance + form.cleaned_data.get('amount'))
+            #customer.refresh_from_db()
+            customer.balance = customer.balance + form.cleaned_data.get('amount')
+            customer.save()
+            customer.deposits_set.create(amount=customer.balance)
+            messages.success(request, "The amount has been added to your balance!")
+    else:
+        form = DepositForm()
     # user's current balance goes here
-    return render(request, 'restaurant/deposit.html')
+    #print(Customers.objects.get(pk=request.user.id).balance)
+    context = {
+        'balance': customer.balance,
+        'form': form
+    }
+    return render(request, 'restaurant/deposit.html', context)
 
 def discussion_board(request):
     context = {
