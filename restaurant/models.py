@@ -3,10 +3,23 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.urls import reverse
+from django.db.models import F
 
 class Customer(User):
     balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
+
+    def inc_warning(self):
+        self.warnings = F('warnings') + 1
+        self.save()
+        self.check_warnings()
+
+    def check_warnings(self):
+        for cust in Customer.objects.filter(warnings__gte=3):
+            cust.delete()
+
+    def get_customer(id):
+        return Customer.objects.get(pk=id)
 
     class Meta:
         permissions = [('has_vip', 'Has VIP permission')]
@@ -91,6 +104,15 @@ class Report(models.Model):
     report_body = models.TextField()
     dispute_body = models.TextField()
     is_disputed = models.BooleanField(default = False)
+    time_reported = models.DateTimeField(default=timezone.now)
+
+    def accept_report(self):
+        self.complainee.inc_warning()
+        self.delete()
+
+    def deny_report(self):
+        self.snitch.inc_warning()
+        self.delete()
 
 class UnproccessedComplaint(models.Model):
     class SnitchType(models.TextChoices):

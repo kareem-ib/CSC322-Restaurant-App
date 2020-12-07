@@ -131,9 +131,10 @@ class CreateReportView(CreateView):
         return reverse('discussion_board')
 
     def form_valid(self, form):
+        #Add a check for user == author
         form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
         form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
-        messages.success(request, "Your report has been received!")
+        messages.success(self.request, "Your report has been received!")
         return super().form_valid(form)
 
 @login_required
