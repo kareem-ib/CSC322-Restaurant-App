@@ -2,24 +2,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 #from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm, DepositForm
+from .forms import UserRegisterForm, DepositForm, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customers
-
-posts = [
-    {
-        'author': 'Author 1',
-        'title': 'Exam 2 Comments',
-        'content': 'Trash exams. Drop the course.',
-        'date_posted': 'November 25, 2020'
-    },
-    {
-        'author': 'Author 2',
-        'title': 'Update to Project',
-        'content': 'Project is cancelled. You all get 0s.',
-        'date_posted': 'November 25, 2020'
-    }
-]
+from .models import Customer, Post
+from django.views.generic import ListView, DetailView, CreateView
+from django.urls import reverse
 
 # Create your views here.
 def index(request):
@@ -36,7 +23,7 @@ def complaint_compliment(request):
 
 @login_required
 def deposit(request):
-    customer = Customers.objects.get(pk=request.user.id)
+    customer = Customer.objects.get(pk=request.user.id)
     if request.method == 'POST':
         form = DepositForm(request.POST)
         if form.is_valid():
@@ -56,11 +43,17 @@ def deposit(request):
     }
     return render(request, 'restaurant/deposit.html', context)
 
-def discussion_board(request):
+'''def discussion_board(request):
     context = {
-        'posts': posts
+        'posts': Post.objects.all()
     }
-    return render(request, 'restaurant/discussion_board.html', context)
+    return render(request, 'restaurant/discussion_board.html', context)'''
+
+class DiscussionBoardView(ListView):
+    model = Post
+    template_name = 'restaurant/discussion_board.html'
+    context_object_name = 'posts'
+    ordering = ['-time_posted']
 
 def home(request):
     return render(request, 'restaurant/main_page.html')
@@ -68,9 +61,36 @@ def home(request):
 def login(request):
     return render(request, 'restaurant/login.html')
 
-@login_required
+#make_post() was turned into a class-based view.
+'''@login_required
 def make_post(request):
-    return render(request, 'restaurant/make_post.html')
+    customer = Customer.objects.get(pk=request.user.id)
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your post has been created!")
+            return redirect('discussion_board')
+    else:
+        form = PostForm()
+    return render(request, 'restaurant/make_post.html', {'form': form})'''
+
+class SpecificPostView(DetailView):
+    model = Post
+    context_object_name = 'post'
+
+class CreatePostView(CreateView):
+    model = Post
+    template_name = 'restaurant/make_post.html'
+    fields = ['subject', 'body']
+
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    def form_valid(self, form):
+        form.instance.author = Customer.objects.get(pk=self.request.user.id)
+        messages.success(self.request, "Your post has been added!")
+        return super().form_valid(form)
 
 def menu(request):
     # user's personalized dishes go here

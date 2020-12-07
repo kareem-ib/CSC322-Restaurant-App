@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.urls import reverse
 
-class Customers(User):
+class Customer(User):
     balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
 
@@ -40,8 +42,8 @@ class DeliveryPerson(Staff):
     class Meta:
         proxy = True
 
-class Deposits(models.Model):
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+class Deposit(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     class PaymentType(models.TextChoices):
@@ -58,8 +60,8 @@ class Menu(models.Model):
     total_ratings = models.IntegerField(default=0)
     avg_ratings = models.FloatField(default=0.0)
 
-class Orders(models.Model):
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # Needs to be multiple dishes
     dish = models.ForeignKey(Menu, on_delete=models.CASCADE)
     chef_prepared = models.ForeignKey(Chef, on_delete=models.CASCADE)
@@ -70,20 +72,26 @@ class Orders(models.Model):
     class Meta:
         ordering = ['-order_date']
 
-class Posts(models.Model):
-    author = models.ForeignKey(Customers, on_delete=models.CASCADE)
-    time_posted = models.DateTimeField()
-    subject = models.TextField()
+class Post(models.Model):
+    author = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    time_posted = models.DateTimeField(default=timezone.now)
+    subject = models.CharField(max_length=200)
     body = models.TextField()
 
+    def __str__(self):
+        return self.subject
+
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.pk})
+
 # Only customers
-class Reports(models.Model):
-    snitch = models.ForeignKey(Customers, related_name='reports_snitch', on_delete=models.CASCADE)
-    complainee = models.ForeignKey(Customers, related_name='reports_complainee', on_delete=models.CASCADE)
+class Report(models.Model):
+    snitch = models.ForeignKey(Customer, related_name='reports_snitch', on_delete=models.CASCADE)
+    complainee = models.ForeignKey(Customer, related_name='reports_complainee', on_delete=models.CASCADE)
     report_body = models.TextField()
     dispute_body = models.TextField()
 
-class UnproccessedComplaints(models.Model):
+class UnproccessedComplaint(models.Model):
     class SnitchType(models.TextChoices):
         CUSTOMER = 'CUST', _('Customers')
         DP = 'DP', _('Delivery Person')
@@ -101,15 +109,15 @@ class UnproccessedComplaints(models.Model):
     dispute_body = models.TextField()
 
     def resolveSnitchType(self):
-        if self.snitch_type == UnproccessedComplaints.SnitchType.CUSTOMER:
+        if self.snitch_type == UnproccessedComplaint.SnitchType.CUSTOMER:
             return Customers.objects.get(pk=self.complainee_id)
         else:
             return DeliveryPerson.objects.get(pk=self.complainee_id)
 
     def resolveComplaineeType(self):
-        if self.complainee_type == UnproccessedComplaints.ComplaineeType.CUSTOMER:
-            return Customers.objects.get(pk=self.complainee_id)
-        elif self.complainee_type == UnproccessedComplaints.ComplaineeType.DP:
+        if self.complainee_type == UnproccessedComplaint.ComplaineeType.CUSTOMER:
+            return Customer.objects.get(pk=self.complainee_id)
+        elif self.complainee_type == UnproccessedComplaint.ComplaineeType.DP:
             return DeliveryPerson.objects.get(pk=self.complainee_id)
         else:
             return Chef.objects.get(pk=self.complainee_id)

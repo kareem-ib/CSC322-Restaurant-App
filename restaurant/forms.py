@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Customers
+from .models import Customer, Post
 
 class UserRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=20, required=True)
@@ -10,7 +10,7 @@ class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
 
     class Meta:
-        model = Customers
+        model = Customer
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
 class DepositForm(forms.Form):
@@ -20,9 +20,15 @@ class DepositForm(forms.Form):
     class Meta:
         fields = ['amount', 'card_number']
 
-'''class PostForm(forms.Form):
+class PostForm(forms.Form):
+    subject = forms.CharField(max_length=200, required=True)
+    body = forms.CharField(max_length=2000, required=True, widget=forms.Textarea)
 
-class ReportForm(forms.Form):
+    class Meta:
+        model = Post
+        fields = ['subject', 'body']
+
+'''class ReportForm(forms.Form):
 
 class DisputeForm(forms.Form):
 
