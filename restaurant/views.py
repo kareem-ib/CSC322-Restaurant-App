@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 #from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm, DepositForm, PostForm
+from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post
+from .models import Customer, Post, Report
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse
 
@@ -113,9 +113,28 @@ def register(request):
 def profile(request):
     return render(request, 'restaurant/profile.html')
 
-@login_required
+'''@login_required
 def report(request):
-    return render(request, 'restaurant/report.html')
+    return render(request, 'restaurant/report.html')'''
+
+class CreateReportView(CreateView):
+    model = Report
+    template_name = 'restaurant/report.html'
+    fields = ['report_body']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
+        return context
+
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    def form_valid(self, form):
+        form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
+        form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
+        messages.success(request, "Your report has been received!")
+        return super().form_valid(form)
 
 @login_required
 def dispute(request):

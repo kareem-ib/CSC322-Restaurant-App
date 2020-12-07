@@ -20,7 +20,7 @@ class DepositForm(forms.Form):
     class Meta:
         fields = ['amount', 'card_number']
 
-class PostForm(forms.Form):
+'''class PostForm(forms.Form):
     subject = forms.CharField(max_length=200, required=True)
     body = forms.CharField(max_length=2000, required=True, widget=forms.Textarea)
 
@@ -28,7 +28,7 @@ class PostForm(forms.Form):
         model = Post
         fields = ['subject', 'body']
 
-'''class ReportForm(forms.Form):
+class ReportForm(forms.Form):
 
 class DisputeForm(forms.Form):
 

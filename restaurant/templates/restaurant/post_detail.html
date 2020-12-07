@@ -1,0 +1,26 @@
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="#">{{ post.author }}</a>
+        <small class="text-muted">{{ post.time_posted }}</small>
+      </div>
+      <h2 class="article-title">{{ post.subject }}</h2>
+      <p class="article-content">{{ post.body }}</p>
+    </div>
+  </article>
+{% endblock content %}
+{% block sidebar %}
+  <div class="col-md-4">
+    <div class="content-section">
+      <h4>Discussion Board Actions</h4>
+      <p class='text-muted'>
+        <a href="{% url 'make_post' %}" class="list-group-item list-group-item-dark">Make a Post</a>
+        <!--<a href="{% url 'report' %}" class="list-group-item list-group-item-dark">Report a User</a>-->
+        <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute a Report</a>
+      </p>
+    </div>
+  </div>
+{% endblock sidebar %}
+<!-- Turn the side bar into post actions (report and comment) rather than the discussion board actions -->

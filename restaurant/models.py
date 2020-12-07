@@ -90,6 +90,7 @@ class Report(models.Model):
     complainee = models.ForeignKey(Customer, related_name='reports_complainee', on_delete=models.CASCADE)
     report_body = models.TextField()
     dispute_body = models.TextField()
+    is_disputed = models.BooleanField(default = False)
 
 class UnproccessedComplaint(models.Model):
     class SnitchType(models.TextChoices):
