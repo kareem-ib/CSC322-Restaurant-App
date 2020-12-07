@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
 from .models import Customer, Post, Report
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 
 # Create your views here.
@@ -137,6 +137,33 @@ class CreateReportView(CreateView):
         messages.success(self.request, "Your report has been received!")
         return super().form_valid(form)
 
-@login_required
+class DisputeListView(ListView):
+    model = Report
+    template_name = 'restaurant/dispute_list.html'
+    context_object_name = 'reports'
+    ordering = ['-time_reported']
+
+    def get_queryset(self):
+        return Report.objects.filter(complainee=self.request.user.id)
+
+class DisputeUpdateView(UpdateView):
+    model = Report
+    template_name = 'restaurant/dispute_form.html'
+    fields = ['dispute_body']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['snitch'] = Report.objects.get(pk=self.kwargs['pk']).snitch
+        return context
+
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your dispute has been received!")
+        form.instance.is_disputed = True
+        return super().form_valid(form)
+
+'''@login_required
 def dispute(request):
-    return render(request, 'restaurant/dispute.html')
+    return render(request, 'restaurant/dispute.html')'''

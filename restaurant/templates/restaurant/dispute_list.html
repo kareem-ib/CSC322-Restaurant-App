@@ -1,0 +1,31 @@
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  {% for report in reports %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">{{ report.snitch }}</a>
+          <small class="text-muted">{{ report.time_posted }}</small>
+          {% if not report.is_disputed %}
+            <a href="{% url 'dispute' report.pk %}" class="small float-right">dispute</a>
+          {% endif %}
+        </div>
+        <!-- Record which post was reported to view here -->
+       <!--<h2><a class="article-title" href="url 'post_detail' post.id">{{ dispute.subject }}</a></h2>-->
+        <p class="article-content">{{ report.report_body }}</p>
+      </div>
+    </article>
+  {% endfor %}
+{% endblock content %}
+<!--{% block sidebar %}
+<div class="col-md-4">
+  <div class="content-section">
+    <h4>Discussion Board Actions</h4>
+    <p class='text-muted'>
+      <a href="{% url 'make_post' %}" class="list-group-item list-group-item-dark">Make a Post</a>
+      <a href="{% url 'report' %}" class="list-group-item list-group-item-dark">Report a User</a>
+      <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute a Report</a>
+    </p>
+  </div>
+</div>
+{% endblock sidebar %}-->

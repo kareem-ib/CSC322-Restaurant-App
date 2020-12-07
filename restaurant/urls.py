@@ -2,7 +2,12 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from restaurant import views as user_views
-from .views import DiscussionBoardView, SpecificPostView, CreatePostView, CreateReportView
+from .views import (DiscussionBoardView, 
+SpecificPostView, 
+CreatePostView, 
+CreateReportView, 
+DisputeListView, 
+DisputeUpdateView)
 
 from . import views
 
@@ -24,5 +29,6 @@ urlpatterns = [
     path('profile/', user_views.profile, name='profile'),
     path('report/<int:pk>', login_required(CreateReportView.as_view()), name='report'),
     path('report/', login_required(CreateReportView.as_view()), name='report'),
-    path('dispute/', user_views.dispute, name='dispute'),
+    path('dispute/', login_required(DisputeListView.as_view()), name='dispute'),
+    path('dispute/<int:pk>', login_required(DisputeUpdateView.as_view()), name='dispute'),
 ]

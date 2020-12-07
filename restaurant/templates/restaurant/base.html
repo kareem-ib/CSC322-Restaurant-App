@@ -30,7 +30,7 @@
               {% if user.is_authenticated %}
                 <!--<a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>-->
                 {% if user.is_superuser %}
-                  <a class="nav-item nav-link" href="/admin/">Admin Page</a>
+                  <a class="nav-item nav-link" href="/admin/">Admin</a>
                 {% endif %}
                 <a class="nav-item nav-link" href="#">{{ user.username }}</a>
                 <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
