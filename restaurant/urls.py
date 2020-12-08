@@ -2,12 +2,13 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from restaurant import views as user_views
-from .views import (DiscussionBoardView, 
-SpecificPostView, 
-CreatePostView, 
-CreateReportView, 
-DisputeListView, 
-DisputeUpdateView)
+from .views import (DiscussionBoardView,
+SpecificPostView,
+CreatePostView,
+CreateReportView,
+DisputeListView,
+DisputeUpdateView,
+MenuListView)
 
 from . import views
 
@@ -22,7 +23,8 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     #path('make_post/', views.make_post, name='make_post'),
     path('make_post/', login_required(CreatePostView.as_view()), name='make_post'),
-    path('menu/', views.menu, name='menu'),
+    #path('menu/', views.menu, name='menu'),
+    path('menu/', MenuListView.as_view(), name='menu'),
     path('register/', user_views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='restaurant/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='restaurant/logout.html'), name='logout'),

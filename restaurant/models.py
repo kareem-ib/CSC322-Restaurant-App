@@ -5,6 +5,21 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db.models import F
 
+DINING_CHOICES = (
+    ('DI', 'Dine In'),
+    ('D', 'Delivery'),
+    ('P', 'Pickup')
+)
+
+TAG_CHOICES = (
+    ('A', 'Appetizers'),
+    ('S', 'Salads'),
+    ('C', 'Chicken'),
+    ('B', 'Beef'),
+    ('P', 'Pork'),
+    ('D', 'Desserts')
+)
+
 class Customer(User):
     balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
@@ -12,7 +27,7 @@ class Customer(User):
     def inc_warning(self):
         self.warnings = F('warnings') + 1
         self.save()
-        self.check_warnings()
+        self.check_warnings(null=True)
 
     def check_warnings(self):
         for cust in Customer.objects.filter(warnings__gte=3):
@@ -33,6 +48,7 @@ class Staff(User):
     # Might end up just using 1, + compliments, 0 equal, - complaints
     complaints = models.IntegerField(default=0)
     compliments = models.IntegerField(default=0)
+    salary = models.DecimalField(max_digits=7, decimal_places=2, default=12500)
 
 class ChefManager(models.Manager):
      def get_queryset(self, *args, **kwargs):
@@ -65,22 +81,32 @@ class Deposit(models.Model):
 
     payment_type = models.CharField(max_length=6, choices=PaymentType.choices, default=PaymentType.CARD)
 
-class Menu(models.Model):
-    dish_name = models.CharField(max_length=500)
-    dish_chef = models.ForeignKey(Chef, on_delete=models.CASCADE)
-    description = models.TextField()
+class Dish(models.Model):
+    name = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=6, decimal_places=2)
+    description = models.TextField()
     total_ratings = models.IntegerField(default=0)
     avg_ratings = models.FloatField(default=0.0)
+    dish_chef = models.ForeignKey(Chef, on_delete=models.CASCADE)
+    tag = models.CharField(choices=TAG_CHOICES, max_length=1)
+    image = models.ImageField()
+    last_ordered_date = models.DateTimeField(default=timezone.now)
+
+class MenuItems(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    item = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=1)
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    # Needs to be multiple dishes
-    dish = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    dishes = models.ManyToManyField(MenuItems)
     chef_prepared = models.ForeignKey(Chef, on_delete=models.CASCADE)
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     dine_in_time = models.DateTimeField(null=True)
-    order_date = models.DateTimeField()
+    order_date = models.DateTimeField(default=timezone.now)
+    dining_option = models.CharField(choices=DINING_CHOICES, max_length=2, default='D')
+    delivery_address = models.CharField(max_length=200, null=True)
 
     class Meta:
         ordering = ['-order_date']

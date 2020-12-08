@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post, Report
+from .models import Customer, Post, Report, Dish
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 
@@ -89,7 +89,7 @@ def filter_taboo_words(text):
         if word in TABOO_WORDS:
             split_text[i] = '***'
             total_taboo_words += 1
-    
+
     return ' '.join(split_text), total_taboo_words
 
 class CreatePostView(CreateView):
@@ -113,17 +113,24 @@ class CreatePostView(CreateView):
                 return redirect(reverse('discussion_board'))
 
             messages.warning(self.request, "Your post has some taboo words. You have been warned.")
-            
+
         form.instance.subject = subject
         form.instance.body = body
         form.instance.author = Customer.objects.get(pk=self.request.user.id)
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
 
-def menu(request):
+'''def menu(request):
     # user's personalized dishes go here
     # menu goes here
     return render(request, 'restaurant/menu.html')
+'''
+
+class MenuListView(ListView):
+    model = Dish
+    template_name = 'restaurant/menu.html'
+    context_object_name = 'dishes'
+    ordering = ['tag']
 
 def register(request):
     if request.method == 'POST':
