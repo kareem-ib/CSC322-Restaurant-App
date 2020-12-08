@@ -8,6 +8,8 @@ from .models import Customer, Post, Report
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 
+TABOO_WORDS = ['fk', 'fu', 'shoit']
+
 # Create your views here.
 def index(request):
     #return HttpResponse('Welcome to the restaurant')
@@ -79,6 +81,17 @@ class SpecificPostView(DetailView):
     model = Post
     context_object_name = 'post'
 
+def filter_taboo_words(text):
+    split_text = text.split()
+    total_taboo_words = 0
+    print('TEXT:', text, 'SPLIT', split_text)
+    for i, word in enumerate(split_text):
+        if word in TABOO_WORDS:
+            split_text[i] = '***'
+            total_taboo_words += 1
+    
+    return ' '.join(split_text), total_taboo_words
+
 class CreatePostView(CreateView):
     model = Post
     template_name = 'restaurant/make_post.html'
@@ -88,6 +101,21 @@ class CreatePostView(CreateView):
         return reverse('discussion_board')
 
     def form_valid(self, form):
+        body, taboo_words_1 = filter_taboo_words(form.instance.body)
+        subject, taboo_words_2 = filter_taboo_words(form.instance.subject)
+
+        taboo_words = taboo_words_1 + taboo_words_2
+
+        if taboo_words > 0:
+            Customer.objects.get(pk=self.request.user).inc_warning()
+            if taboo_words > 3:
+                messages.error(self.request, "Your post has too many taboo words.")
+                return redirect(reverse('discussion_board'))
+
+            messages.warning(self.request, "Your post has some taboo words. You have been warned.")
+            
+        form.instance.subject = subject
+        form.instance.body = body
         form.instance.author = Customer.objects.get(pk=self.request.user.id)
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
