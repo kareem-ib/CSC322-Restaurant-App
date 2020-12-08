@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post, Report, Dish
+from .models import Customer, Post, Report, Dish, TAG_CHOICES
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 
@@ -129,8 +129,20 @@ class CreatePostView(CreateView):
 class MenuListView(ListView):
     model = Dish
     template_name = 'restaurant/menu.html'
-    context_object_name = 'dishes'
+    #context_object_name = 'dishes'
     ordering = ['tag']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sorted_dishes = []
+        for tag in TAG_CHOICES:
+            dish_tag_list = Dish.objects.filter(tag=tag[0])
+            # We want 3 items per slide
+            n = 3
+            divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
+            sorted_dishes.append((tag[1], divided_list))
+        context['sorted_dishes'] = sorted_dishes
+        return context
 
 def register(request):
     if request.method == 'POST':

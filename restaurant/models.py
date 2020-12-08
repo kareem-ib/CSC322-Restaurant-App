@@ -12,6 +12,7 @@ DINING_CHOICES = (
 )
 
 TAG_CHOICES = (
+    ('SP', 'Specials'),
     ('A', 'Appetizers'),
     ('S', 'Salads'),
     ('C', 'Chicken'),
@@ -88,7 +89,7 @@ class Dish(models.Model):
     total_ratings = models.IntegerField(default=0)
     avg_ratings = models.FloatField(default=0.0)
     dish_chef = models.ForeignKey(Chef, on_delete=models.CASCADE)
-    tag = models.CharField(choices=TAG_CHOICES, max_length=1)
+    tag = models.CharField(choices=TAG_CHOICES, max_length=2)
     image = models.ImageField()
     last_ordered_date = models.DateTimeField(default=timezone.now)
 
