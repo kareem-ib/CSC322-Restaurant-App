@@ -135,3 +135,9 @@ LOGIN_URL = 'login'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+FIXTURES_DIRS = (os.path.join(BASE_DIR, 'restaurant/fixtures'),)
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'restaurant/media')
+
+MEDIA_URL = '/media/'

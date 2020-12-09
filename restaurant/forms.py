@@ -19,17 +19,3 @@ class DepositForm(forms.Form):
 
     class Meta:
         fields = ['amount', 'card_number']
-
-'''class PostForm(forms.Form):
-    subject = forms.CharField(max_length=200, required=True)
-    body = forms.CharField(max_length=2000, required=True, widget=forms.Textarea)
-
-    class Meta:
-        model = Post
-        fields = ['subject', 'body']
-
-class ReportForm(forms.Form):
-
-class DisputeForm(forms.Form):
-
-class ComplaintComplimentForm(forms.Form):'''

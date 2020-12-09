@@ -1,0 +1,147 @@
+[
+  {
+    "model": "restaurant.chef",
+    "pk": 1,
+    "fields": {
+      "first_name": "Gordon",
+      "last_name": "Ramsay",
+      "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4="
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 1,
+    "fields": {
+      "name": "Mozzarella Sticks",
+      "price": 50.00,
+      "description": "Classic mozzarella sticks with marinara sauce.",
+      "dish_chef": 1,
+      "tag": "A",
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 2,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 3,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 4,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 5,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 6,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 7,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 8,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 9,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+  {
+    "model": "restaurant.dish",
+    "pk": 10,
+    "fields": {
+      "name": ,
+      "price": ,
+      "description": ,
+      "total_ratings": ,
+      "avg_ratings": ,
+      "dish_chef": ,
+      "tag": ,
+      "image": ,
+    }
+  },
+]

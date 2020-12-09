@@ -116,7 +116,7 @@ class CreatePostView(CreateView):
 
         form.instance.subject = subject
         form.instance.body = body
-        form.instance.author = Customer.objects.get(pk=self.request.user.id)
+        form.instance.author = Customer.objects.get(pk=self.request.user)
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
 

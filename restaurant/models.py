@@ -28,7 +28,7 @@ class Customer(User):
     def inc_warning(self):
         self.warnings = F('warnings') + 1
         self.save()
-        self.check_warnings(null=True)
+        self.check_warnings()
 
     def check_warnings(self):
         for cust in Customer.objects.filter(warnings__gte=3):
@@ -41,36 +41,48 @@ class Customer(User):
         permissions = [('has_vip', 'Has VIP permission')]
 
 class Staff(User):
-    class Types(models.TextChoices):
+    """class Types(models.TextChoices):
         CHEF = 'CHEF', 'Chef'
-        DP = 'DP', 'Delivery Person'
+        DP = 'DP', 'Delivery Person'"""
 
-    type = models.CharField(_('Type'), max_length=50, choices=Types.choices)
+    #type = models.CharField(_('Type'), max_length=50, choices=Types.choices)
     # Might end up just using 1, + compliments, 0 equal, - complaints
     complaints = models.IntegerField(default=0)
     compliments = models.IntegerField(default=0)
     salary = models.DecimalField(max_digits=7, decimal_places=2, default=12500)
 
-class ChefManager(models.Manager):
-     def get_queryset(self, *args, **kwargs):
-         return super().get_queryset(*args, *kwargs).filter(type=Staff.Types.CHEF)
+    class Meta:
+        abstract = True
+
+"""class ChefManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, *kwargs).filter(type=Staff.Types.CHEF)
+
+    def create(self, **kwargs):
+        kwargs.update({"type": "CHEF"})
+        return super(ChefManager, self).create(**kwargs)"""
 
 class Chef(Staff):
-    options = ChefManager()
+    #objects = ChefManager()
+
+    def is_desig_chef(self):
+        return self.has_perm('restaurant.has_desig_chef')
 
     class Meta:
-        proxy = True
         permissions = [('has_desig_chef', 'Has Designated chef permission')]
 
-class DeliveryPersonManager(models.Manager):
-     def get_queryset(self, *args, **kwargs):
-         return super().get_queryset(*args, *kwargs).filter(Staff.Types.DP)
+"""class DeliveryPersonManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, *kwargs).filter(Staff.Types.DP)
+    def create(self, **kwargs):
+        kwargs.update({"type": "DP"})
+        return super(DeliveryPersonManager, self).create(**kwargs)"""
 
 class DeliveryPerson(Staff):
-    options = DeliveryPersonManager()
+    #objects = DeliveryPersonManager()
 
-    class Meta:
-        proxy = True
+    """class Meta:
+        proxy = True"""
 
 class Deposit(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -90,8 +102,15 @@ class Dish(models.Model):
     avg_ratings = models.FloatField(default=0.0)
     dish_chef = models.ForeignKey(Chef, on_delete=models.CASCADE)
     tag = models.CharField(choices=TAG_CHOICES, max_length=2)
-    image = models.ImageField()
+    image = models.ImageField(upload_to='img')
     last_ordered_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Dish'
+        verbose_name_plural = 'Dishes'
 
 class MenuItems(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)

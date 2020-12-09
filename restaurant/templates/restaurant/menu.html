@@ -1,5 +1,13 @@
 {% extends 'restaurant/base.html' %}
+{% load static %}
 {% block override %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
   <div class="col-md-12">
     <div class="content-section col-md-10">
       <h2>Your Cart</h2>
@@ -8,28 +16,30 @@
     {% for dish in sorted_dishes %}
       <h3>{{ dish.0 }}</h3>
       <div id="multi-item-example" class="carousel slide carousel-multi-item" data-ride="carousel" data-interval="false">
-        <div class="controls-bottom">
-          <a class="btn btn-info col-md-5" href="#multi-item-example" data-slide="prev">Prev</a>
-          <a class="btn btn-info col-md-5" href="#multi-item-example" data-slide="next">Next</a>
-        </div>
+        <!--<div class="controls-top" style="float: right">
+          <a class="btn btn-dark col-md-5" href="#multi-item-example" data-slide="prev">&lt;</a>
+          <a class="btn btn-dark col-md-5" href="#multi-item-example" data-slide="next">&gt;</a>
+        </div>-->
         <div class="carousel-inner" role="listbox">
         {% for slide in dish.1 %}
           {% for item in slide %}
             <div class="carousel-item active">
-              <div class="col-md-3" style="float:left">
-               <div class="card mb-2">
-                  <img class="card-img-top"
-                    src="https://mdbootstrap.com/img/Photos/Horizontal/City/4-col/img%20(60).jpg" alt="Card image cap">
+              <div class="col-md-4" style="float:left">
+               <div class="card mb-2 content-section">
+                  <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" height="250px">
                   <div class="card-body">
                     <h4 class="card-title">{{ item.name }}</h4>
                     <p class="card-text">{{ item.description }}</p>
-                    <a class="btn btn-primary">Add to Cart</a>
+                    <p class="card-text">${{ item.price }}</p>
+                    <p class="card-text">Rating: <a href="#">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
+                    <a class="btn btn-dark text-light" href="{% url 'menu_update' %}">Add to Cart</a>
                   </div>
                 </div>
               </div>
             </div>
           {% endfor %}
         {% endfor %}
+        </div>
+      </div>
     {% endfor %}
-  </div>
 {% endblock override %}

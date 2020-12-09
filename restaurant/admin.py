@@ -1,8 +1,6 @@
 from django.contrib import admin
-from .models import Customer, Post, Report
+from .models import Customer, Post, Report, Dish, Chef
 from django.contrib.admin.models import LogEntry
-
-LogEntry.objects.all().delete()
 
 # Register your models here.
 def accept_report(modeladmin, request, queryset):
@@ -22,6 +20,13 @@ class ReportAdmin(admin.ModelAdmin):
     ordering = ['-time_reported']
     actions = [accept_report, deny_report]
 
+"""@admin.Register(Chef)
+class DesignatedChef(admin.UserAdmin):"""
+
+
+admin.site.site_header = 'Los Tres Locos'
 admin.site.register(Customer)
 admin.site.register(Post)
 admin.site.register(Report, ReportAdmin)
+admin.site.register(Dish)
+admin.site.register(Chef)

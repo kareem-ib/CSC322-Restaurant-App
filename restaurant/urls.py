@@ -3,14 +3,15 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from restaurant import views as user_views
 from .views import (DiscussionBoardView,
-SpecificPostView,
-CreatePostView,
-CreateReportView,
-DisputeListView,
-DisputeUpdateView,
-MenuListView)
+                    SpecificPostView,
+                    CreatePostView,
+                    CreateReportView,
+                    DisputeListView,
+                    DisputeUpdateView,
+                    MenuListView)
 
 from . import views
+#from ..restaurant_app import settings
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -34,3 +35,5 @@ urlpatterns = [
     path('dispute/', login_required(DisputeListView.as_view()), name='dispute'),
     path('dispute/<int:pk>', login_required(DisputeUpdateView.as_view()), name='dispute'),
 ]
+
+#urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
