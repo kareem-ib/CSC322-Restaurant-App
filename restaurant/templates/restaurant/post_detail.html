@@ -1,13 +1,13 @@
 {% extends 'restaurant/base.html' %}
 {% block content %}
   <article class="media content-section">
-    <div class="media-body">
+    <div class="media-body col-md-12">
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ post.author }}</a>
         <small class="text-muted">{{ post.time_posted }}</small>
       </div>
-      <h2 class="article-title">{{ post.subject }}</h2>
-      <p class="article-content">{{ post.body }}</p>
+      <h2 class="article-title text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ post.subject }}</h2>
+      <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ post.body }}</p>
     </div>
   </article>
 {% endblock content %}
