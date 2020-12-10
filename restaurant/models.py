@@ -95,8 +95,9 @@ class Chef(Staff):
 class DeliveryPerson(Staff):
     #objects = DeliveryPersonManager()
 
-    """class Meta:
-        proxy = True"""
+    class Meta:
+        verbose_name = 'Delivery Person'
+        verbose_name_plural = 'Delivery People'
 
 class Deposit(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -137,6 +138,8 @@ class MenuItems(models.Model):
         return '{}, {}'.format(self.item.name, str(self.quantity))
 
     def update_item_date(self):
+        print(timezone.now())
+        print('sdgsdgsdgsdgsd')
         self.item.last_ordered_date = timezone.now()
         self.item.save()
 
@@ -154,12 +157,13 @@ class MenuItems(models.Model):
 class Orders(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     #dishes = models.ManyToManyField(MenuItems)
-    chef_prepared = models.ForeignKey(Chef, on_delete=models.CASCADE)
+    chef_prepared = models.ForeignKey(Chef, on_delete=models.SET_NULL, null=True)
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     dine_in_time = models.DateTimeField(null=True)
     order_date = models.DateTimeField(default=timezone.now)
     dining_option = models.CharField(choices=DINING_CHOICES, max_length=2, default='D')
     delivery_address = models.CharField(max_length=200, null=True)
+    delivery_person = models.ForeignKey(DeliveryPerson, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         ordering = ['-order_date']

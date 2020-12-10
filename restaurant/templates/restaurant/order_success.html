@@ -1,1 +1,7 @@
 {% extends 'restaurant/base.html' %}
+{% block override %}
+    <div>
+        <h1>Your order has been placed!</h1>
+        <h3>Here is your confirmation code: {{ uuid }}</h3>
+    </div>
+{% endblock override %}

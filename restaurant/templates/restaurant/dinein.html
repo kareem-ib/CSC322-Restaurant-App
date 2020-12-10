@@ -1,4 +1,15 @@
 {% extends 'restaurant/checkout.html' %}
 {% load crispy_forms_tags %}
 {% block checkout %}
+    <br />
+    <form class="content-section" method="POST">
+    {% csrf_token %}
+    <fieldset class="form-group col-md-10">
+        <legend class="border-bottom font-weight-bold">Place Your Dine In Order!</legend>
+        {{ form|crispy }}
+    </fieldset>
+    <div class="form-group col-md-10">
+        <button class="btn btn-dark" type="submit">Submit</button>
+    </div>
+    </form>
 {% endblock checkout %}

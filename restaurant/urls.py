@@ -10,8 +10,8 @@ from .views import (DiscussionBoardView,
                     DisputeUpdateView,
                     MenuListView,
                     DeliveryCreateView,
-                    DineInCreateView,
-                    TakeoutCreateView)
+                    DineInCreateView,)
+#                    TakeoutCreateView)
 
 from . import views
 #from ..restaurant_app import settings
@@ -34,7 +34,7 @@ urlpatterns = [
     path('checkout', views.checkout, name='checkout'),
     path('chekcout/delivery', login_required(DeliveryCreateView.as_view()), name='delivery'),
     path('chekcout/dinein', login_required(DineInCreateView.as_view()), name='dinein'),
-    path('chekcout/takeout', login_required(TakeoutCreateView.as_view()), name='takeout'),
+    path('chekcout/takeout', views.takeout, name='takeout'),
     path('order_success/', views.order_success, name='order_success'),
     path('register/', user_views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='restaurant/login.html'), name='login'),

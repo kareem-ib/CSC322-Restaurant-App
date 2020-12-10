@@ -4,11 +4,13 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post, Report, Dish, Orders, TAG_CHOICES
+from .models import Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, TAG_CHOICES
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 from django.db.models import F
 from random import randrange
+from uuid import uuid4
+from django.forms import DateInput
 
 TABOO_WORDS = ['fk', 'fu', 'shoit']
 
@@ -145,6 +147,7 @@ class MenuListView(ListView):
             sorted_dishes.append((tag[1], divided_list))
         context['sorted_dishes'] = sorted_dishes
         cart = []
+        # Check if user is authenticated, if not show defautls
         for item in Customer.get_customer(self.request.user).menuitems_set.all():
             cart.append({'item': item.item.name,
             'price': item.quantity * item.item.price,
@@ -192,7 +195,23 @@ def dinein(request):
 
 @login_required
 def takeout(request):
-    return render(request, 'restaurant/takeout.html')
+    if request.method == 'GET':
+        return render(request, 'restaurant/takeout.html')
+    elif request.method == 'POST':
+        cust = Customer.objects.get(pk=request.user.id)
+        chefs = Chef.objects.all()
+        chef_prepared = chefs[randrange(len(chefs))]
+        cost = cust.get_cart_price()
+        for item in cust.menuitems_set.all():
+            item.update_item_date()
+        print('TAKEOUT WORKS')    
+        Orders(
+            customer = cust,
+            chef_prepared = chef_prepared,
+            cost = cost,
+            dining_option = 'P'
+        ).save()
+        return redirect(reverse('order_success'))
 
 class DeliveryCreateView(CreateView):
     model = Orders
@@ -211,34 +230,58 @@ class DeliveryCreateView(CreateView):
         cust = Customer.objects.get(pk=self.request.user.id)
         form.instance.customer = cust
         chefs = Chef.objects.all()
+        dps = DeliveryPerson.objects.all()
         form.instance.chef_prepared = chefs[randrange(len(chefs))]
-        form.instance.price = cust.get_cart_price()
-        map(lambda x: x.update_item_date(), cust.menuitems_set)
+        form.instance.cost = cust.get_cart_price()
+        form.instance.delivery_person = dps[randrange(len(dps))]
+        for item in cust.menuitems_set.all():
+            item.update_item_date()
         # delete the active order (MenuItem) here
+        # cust.menuitems_set.all().delete()
         return super().form_valid(form)
+
+class DateInputWidget(DateInput):
+    input_type = 'date'
 
 class DineInCreateView(CreateView):
     model = Orders
     template_name = 'restaurant/dinein.html'
-    fields = ['']
+    fields = ['dine_in_time']
 
     def get_success_url(self):
         return reverse('order_success')
 
     def form_valid(self, form):
-        pass
+        cust = Customer.objects.get(pk=self.request.user.id)
+        form.instance.customer = cust
+        chefs = Chef.objects.all()
+        form.instance.chef_prepared = chefs[randrange(len(chefs))]
+        form.instance.cost = cust.get_cart_price()
+        for item in cust.menuitems_set.all():
+            item.update_item_date()        
+        # delete the active order (MenuItem) here
+        return super().form_valid(form)
 
-class TakeoutCreateView(CreateView):
-    model = Orders
-    template_name = 'restaurant/takeout.html'
-    fields = ['']
+    class Meta:
+        widgets = {'dine_in_time': DateInputWidget()}
 
-    def get_success_url(self):
-        return reverse('order_success')
+# class TakeoutCreateView(CreateView):
+#     model = Orders
+#     template_name = 'restaurant/takeout.html'
+#     fields = ['']
+
+#     def get_success_url(self):
+#         return reverse('order_success')
+
+#     def form_valid(self, form):
+        
+#         # delete the active order (MenuItem) here
+#         return super().form_valid(form)
 
 @login_required
 def order_success(request):
-    return render(request, 'restaurant/order_success.html')
+    context = {'uuid': uuid4()}
+    return render(request, 'restaurant/order_success.html', context=context)
 
 # This one
 """class OrderCreateView(CreateView):
