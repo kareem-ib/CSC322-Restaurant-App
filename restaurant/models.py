@@ -115,10 +115,23 @@ class Dish(models.Model):
 class MenuItems(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Dish, on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False)
-    quantity = models.IntegerField(default=1)
+    #ordered = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=0)
 
-class Order(models.Model):
+    def __str__(self):
+        return '{}, {}'.format(self.item.name, str(self.quantity))
+
+"""class Cart(models.Model):
+    customer = models.OneToOneField(Customer, primary_key=True, on_delete=models.CASCADE)
+    dishes = models.ManyToManyField(MenuItems)
+
+    def get_running_cost(self):
+        cost = 0
+        for dish in self.dishes.all():
+            cost += dish.item.cost * dish.quantity
+        return cost"""
+
+class Orders(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     dishes = models.ManyToManyField(MenuItems)
     chef_prepared = models.ForeignKey(Chef, on_delete=models.CASCADE)
@@ -135,7 +148,7 @@ class Post(models.Model):
     author = models.ForeignKey(Customer, on_delete=models.CASCADE)
     time_posted = models.DateTimeField(default=timezone.now)
     subject = models.CharField(max_length=200)
-    body = models.TextField()
+    body = models.TextField(max_length=2000)
 
     def __str__(self):
         return self.subject

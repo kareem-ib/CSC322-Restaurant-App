@@ -26,6 +26,8 @@ urlpatterns = [
     path('make_post/', login_required(CreatePostView.as_view()), name='make_post'),
     #path('menu/', views.menu, name='menu'),
     path('menu/', MenuListView.as_view(), name='menu'),
+    #path('menu/<int:pk>', MenuDetailView.as_view(), name='menu'),
+    path('menu/add/', views.add_to_cart, name='add_to_cart'),
     path('register/', user_views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='restaurant/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='restaurant/logout.html'), name='logout'),

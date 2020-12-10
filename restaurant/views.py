@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Customer, Post, Report, Dish, TAG_CHOICES
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
+from django.db.models import F
 
 TABOO_WORDS = ['fk', 'fu', 'shoit']
 
@@ -33,7 +34,7 @@ def deposit(request):
             #customer.refresh_from_db()
             customer.balance = customer.balance + form.cleaned_data.get('amount')
             customer.save()
-            customer.deposits_set.create(amount=customer.balance)
+            customer.deposit_set.create(amount=customer.balance)
             messages.success(request, "The amount has been added to your balance!")
     else:
         form = DepositForm()
@@ -142,7 +143,45 @@ class MenuListView(ListView):
             divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
             sorted_dishes.append((tag[1], divided_list))
         context['sorted_dishes'] = sorted_dishes
+        cart = []
+        for item in Customer.get_customer(self.request.user).menuitems_set.all():
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity})
+        context['cart'] = cart
         return context
+
+@login_required
+def add_to_cart(request):
+    """
+    On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.
+    """
+    print("On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.")
+    if request.method == 'POST':
+        cust = Customer.objects.get(pk=request.user)
+        # index 0 to just grab the Cart object instead of the tuple of (Cart, Boolean)
+        cart = cust.menuitems_set
+        dish_id = request.POST.get('dish_id')
+        quantity = request.POST.get('quantity')
+        print(dish_id)
+        item = Dish.objects.get(pk=dish_id)
+        menu_item = cart.all().filter(item=item).first()
+        if not menu_item:
+            menu_item = cart.create(item=item, quantity=quantity)
+        else:
+            menu_item.quantity = F('quantity') + quantity
+        menu_item.save()
+        return redirect('menu')
+
+"""@login_required
+def remove_from_cart(request, dish_id):"""
+
+
+"""class MenuUpdateView(UpdateView):
+    model = Order
+
+    def get(self, request):
+        if self.kwargs['pk']:"""
 
 def register(request):
     if request.method == 'POST':

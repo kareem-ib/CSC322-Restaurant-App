@@ -14,7 +14,7 @@ class UserRegisterForm(UserCreationForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
 class DepositForm(forms.Form):
-    amount = forms.DecimalField(max_digits=6, decimal_places=2, required=True)
+    amount = forms.DecimalField(max_digits=6, decimal_places=2, required=True, min_value=0)
     card_number = forms.CharField(max_length=16, required=True, widget=forms.PasswordInput)
 
     class Meta:

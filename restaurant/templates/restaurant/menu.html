@@ -11,7 +11,11 @@
   <div class="col-md-12">
     <div class="content-section col-md-10">
       <h2>Your Cart</h2>
-      <p class='text-muted'>Testing</p>
+      <ul>
+        {% for item in cart %}
+          <li>{{ item.quantity }}x {{ item.item }}: ${{ item.price}}</li>
+        {% endfor %}
+      </ul>
     </div>
     {% for dish in sorted_dishes %}
       <h3>{{ dish.0 }}</h3>
@@ -21,18 +25,25 @@
           <a class="btn btn-dark col-md-5" href="#multi-item-example" data-slide="next">&gt;</a>
         </div>-->
         <div class="carousel-inner" role="listbox">
+        <!-- Carousel not working as expected, so it's just used to display the items in a grid of a max width of 3 cards -->
         {% for slide in dish.1 %}
           {% for item in slide %}
             <div class="carousel-item active">
               <div class="col-md-4" style="float:left">
                <div class="card mb-2 content-section">
+                  <!-- item.name here as id for redirecting purposes upon refresh? -->
                   <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" height="250px">
                   <div class="card-body">
                     <h4 class="card-title">{{ item.name }}</h4>
                     <p class="card-text">{{ item.description }}</p>
                     <p class="card-text">${{ item.price }}</p>
                     <p class="card-text">Rating: <a href="#">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
-                    <a class="btn btn-dark text-light" href="{% url 'menu_update' %}">Add to Cart</a>
+                    <form method="POST" action="{% url 'add_to_cart' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="dish_id" value="{{ item.pk }}" />
+                      <input type="hidden" name="quantity" value="1" />
+                      <button type="submit" class="btn btn-dark text-light">Add to Cart</button>
+                    </form>
                   </div>
                 </div>
               </div>
