@@ -6,7 +6,6 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admin', '0004_auto_20201208_2020'),
         ('restaurant', '0008_auto_20201208_2020'),
     ]
 
