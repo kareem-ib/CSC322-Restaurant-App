@@ -18,17 +18,17 @@
       "description": "Classic mozzarella sticks with marinara sauce.",
       "dish_chef": 1,
       "tag": "A",
-      "image": "img/mozzarella-sticks-4.jpg",
+      "image": "/media/mozzarella-sticks-4.jpg",
     }
   },
   {
     "model": "restaurant.dish",
     "pk": 2,
     "fields": {
-      "name": ,
-      "price": ,
-      "description": ,
-      "dish_chef": ,
+      "name": "Fried Beer",
+      "price": 19.99,
+      "description": "Fried in rice bran oil",
+      "dish_chef": 1 ,
       "tag": ,
       "image": ,
     }
