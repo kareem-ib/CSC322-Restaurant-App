@@ -8,7 +8,10 @@ from .views import (DiscussionBoardView,
                     CreateReportView,
                     DisputeListView,
                     DisputeUpdateView,
-                    MenuListView)
+                    MenuListView,
+                    DeliveryCreateView,
+                    DineInCreateView,
+                    TakeoutCreateView)
 
 from . import views
 #from ..restaurant_app import settings
@@ -28,6 +31,11 @@ urlpatterns = [
     path('menu/', MenuListView.as_view(), name='menu'),
     #path('menu/<int:pk>', MenuDetailView.as_view(), name='menu'),
     path('menu/add/', views.add_to_cart, name='add_to_cart'),
+    path('checkout', views.checkout, name='checkout'),
+    path('chekcout/delivery', login_required(DeliveryCreateView.as_view()), name='delivery'),
+    path('chekcout/dinein', login_required(DineInCreateView.as_view()), name='dinein'),
+    path('chekcout/takeout', login_required(TakeoutCreateView.as_view()), name='takeout'),
+    path('order_success/', views.order_success, name='order_success'),
     path('register/', user_views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='restaurant/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='restaurant/logout.html'), name='logout'),

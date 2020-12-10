@@ -37,6 +37,20 @@ class Customer(User):
     def get_customer(id):
         return Customer.objects.get(pk=id)
 
+    def get_cart(self):
+        cart = []
+        for item in self.menuitems_set.all():
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity})
+        return cart
+
+    def get_cart_price(self):
+        price = 0
+        for item in self.menuitems_set.all():
+            price = price + item.quantity * item.item.price
+        return price
+
     class Meta:
         permissions = [('has_vip', 'Has VIP permission')]
 
@@ -112,6 +126,7 @@ class Dish(models.Model):
         verbose_name = 'Dish'
         verbose_name_plural = 'Dishes'
 
+# A given customer's active cart
 class MenuItems(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     item = models.ForeignKey(Dish, on_delete=models.CASCADE)
@@ -120,6 +135,11 @@ class MenuItems(models.Model):
 
     def __str__(self):
         return '{}, {}'.format(self.item.name, str(self.quantity))
+
+    def update_item_date(self):
+        self.item.last_ordered_date = timezone.now()
+        self.item.save()
+
 
 """class Cart(models.Model):
     customer = models.OneToOneField(Customer, primary_key=True, on_delete=models.CASCADE)
@@ -133,7 +153,7 @@ class MenuItems(models.Model):
 
 class Orders(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    dishes = models.ManyToManyField(MenuItems)
+    #dishes = models.ManyToManyField(MenuItems)
     chef_prepared = models.ForeignKey(Chef, on_delete=models.CASCADE)
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     dine_in_time = models.DateTimeField(null=True)

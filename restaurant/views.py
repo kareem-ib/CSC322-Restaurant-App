@@ -4,10 +4,11 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm#, PostForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post, Report, Dish, TAG_CHOICES
+from .models import Customer, Post, Report, Dish, Orders, TAG_CHOICES
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.urls import reverse
 from django.db.models import F
+from random import randrange
 
 TABOO_WORDS = ['fk', 'fu', 'shoit']
 
@@ -175,6 +176,90 @@ def add_to_cart(request):
 
 """@login_required
 def remove_from_cart(request, dish_id):"""
+
+@login_required
+def checkout(request):
+    return render(request, 'restaurant/checkout.html')
+
+# Temporary Views for Forms
+@login_required
+def delivery(request):
+    return render(request, 'restaurant/delivery.html')
+
+@login_required
+def dinein(request):
+    return render(request, 'restaurant/dinein.html')
+
+@login_required
+def takeout(request):
+    return render(request, 'restaurant/takeout.html')
+
+class DeliveryCreateView(CreateView):
+    model = Orders
+    template_name = 'restaurant/delivery.html'
+    fields = ['delivery_address']
+
+    """def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
+        return context"""
+
+    def get_success_url(self):
+        return reverse('order_success')
+
+    def form_valid(self, form):
+        cust = Customer.objects.get(pk=self.request.user.id)
+        form.instance.customer = cust
+        chefs = Chef.objects.all()
+        form.instance.chef_prepared = chefs[randrange(len(chefs))]
+        form.instance.price = cust.get_cart_price()
+        map(lambda x: x.update_item_date(), cust.menuitems_set)
+        # delete the active order (MenuItem) here
+        return super().form_valid(form)
+
+class DineInCreateView(CreateView):
+    model = Orders
+    template_name = 'restaurant/dinein.html'
+    fields = ['']
+
+    def get_success_url(self):
+        return reverse('order_success')
+
+    def form_valid(self, form):
+        pass
+
+class TakeoutCreateView(CreateView):
+    model = Orders
+    template_name = 'restaurant/takeout.html'
+    fields = ['']
+
+    def get_success_url(self):
+        return reverse('order_success')
+
+@login_required
+def order_success(request):
+    return render(request, 'restaurant/order_success.html')
+
+# This one
+"""class OrderCreateView(CreateView):
+    model = Order
+    template_name = 'restaurant/checkout.html'
+    fields = ['']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
+        return context
+
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    def form_valid(self, form):
+        #Add a check for user == author
+        form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
+        form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
+        messages.success(self.request, "Your report has been received!")
+        return super().form_valid(form)"""
 
 
 """class MenuUpdateView(UpdateView):

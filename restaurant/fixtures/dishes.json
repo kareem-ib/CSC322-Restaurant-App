@@ -3,6 +3,7 @@
     "model": "restaurant.chef",
     "pk": 1,
     "fields": {
+      "username": "gramsay",
       "first_name": "Gordon",
       "last_name": "Ramsay",
       "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4="
@@ -17,7 +18,7 @@
       "description": "Classic mozzarella sticks with marinara sauce.",
       "dish_chef": 1,
       "tag": "A",
-      "image": ,
+      "image": "img/mozzarella-sticks-4.jpg",
     }
   },
   {

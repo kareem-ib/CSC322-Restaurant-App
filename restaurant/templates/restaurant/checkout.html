@@ -1,2 +1,18 @@
 {% extends 'restaurant/base.html' %}
-{% load crispy_forms_tags %}
+{% block content %}
+  <div class="col-md-10 content-section">
+    <h2>Your Cart</h2>
+    <ul>
+      {% for item in cart %}
+        <li>{{ item.quantity }}x {{ item.item }}: ${{ item.price}}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-10">
+    <h2>Select a Dining Option</h2>
+    <a class="btn btn-md btn-dark text-light" href="{% url 'delivery' %}">Delivery</a>
+    <a class="btn btn-md btn-dark text-light" href="{% url 'dinein' %}">Dine In</a>
+    <a class="btn btn-md btn-dark text-light" href="{% url 'takeout' %}">Takeout</a>
+  </div>
+  {% block checkout %}{% endblock checkout %}
+{% endblock content %}
