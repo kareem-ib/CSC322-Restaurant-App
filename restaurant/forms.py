@@ -6,7 +6,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit
 
 class CommentForm(forms.ModelForm):
-    body = forms.CharField(max_length=280, )
+    body = forms.CharField(max_length=280,)
 
     class Meta:
         model = Comment
@@ -102,6 +102,8 @@ class DishForm(forms.ModelForm):
         model = Dish
         fields = ()
 
+# Allows a rating to be added to a dish without adding a one-off rating attribute
+# for a given dish.
 class RatingForm(DishForm):
     rating = forms.IntegerField(min_value=0, max_value=5)
 
@@ -115,6 +117,7 @@ class QuitForm(forms.Form):
     quit_request = forms.TypedChoiceField(
         label = "Please Select a Choice",
         choices = ((1, "Yes"), (0, "No")),
+        # Forces the result to be cast as a Boolean from the integer input.
         coerce = lambda x: bool(int(x)),
         widget = forms.RadioSelect,
         required = True,
