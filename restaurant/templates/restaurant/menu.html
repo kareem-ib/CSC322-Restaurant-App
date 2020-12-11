@@ -12,9 +12,14 @@
     <div class="content-section row col-md-10">
       <div class="col-md-6">
         <h2>Your Cart</h2>
-        <ul>
+        <ul class="row">
           {% for item in cart %}
-            <li>{{ item.quantity }}x {{ item.item }}: ${{ item.price}}</li>
+            <li class="col-md-7">{{ item.quantity }}x {{ item.item }}: ${{ item.price}}</li>
+            <form class="" method="POST" action="{% url 'remove_from_cart' %}">
+                {% csrf_token %}
+                <input type="hidden" name="dish_id" value="{{ item.dish_id }}" />
+                <button class="small btn-dark" type="submit">-</button>
+              </form>
           {% endfor %}
         </ul>
       </div>

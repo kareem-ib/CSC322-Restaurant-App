@@ -216,7 +216,8 @@ class MenuListView(ListView):
                 cart.append({'item': item.item.name,
                 'price': item.quantity * item.item.price,
                 'quantity': item.quantity,
-                'tag': item.item.tag})
+                'tag': item.item.tag,
+                'dish_id': item.item.pk})
             context['cart'] = cart
             context['is_VIP'] = cust.is_VIP
 
@@ -316,8 +317,20 @@ def add_to_cart(request):
         menu_item.save()
         return redirect('menu')
 
-"""@login_required
-def remove_from_cart(request, dish_id):"""
+@login_required
+def remove_from_cart(request):
+    """
+    On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.
+    """
+    print("On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.")
+    if request.method == 'POST':
+        cust = Customer.objects.get(pk=request.user.id)
+        # index 0 to just grab the Cart object instead of the tuple of (Cart, Boolean)
+        cart = cust.menuitems_set
+        dish_id = request.POST.get('dish_id')
+        item = Dish.objects.get(pk=dish_id)
+        cart.all().filter(item=item).first().delete()
+        return redirect('menu')
 
 @login_required
 def checkout(request):

@@ -37,6 +37,7 @@ urlpatterns = [
     path('menu/<int:pk>', MenuDetailView.as_view(), name='menu_detail'),
     path('menu/rate/<int:pk>', login_required(RateCreateView.as_view()), name='rate'),
     path('menu/add/', views.add_to_cart, name='add_to_cart'),
+    path('menu/remove/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout', views.checkout, name='checkout'),
     path('chekcout/delivery', login_required(DeliveryCreateView.as_view()), name='delivery'),
     path('chekcout/dinein', login_required(DineInCreateView.as_view()), name='dinein'),
