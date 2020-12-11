@@ -247,6 +247,16 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'pk': self.pk})
 
+class TabooWords(models.Model):
+    word = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.word
+
+    class Meta:
+        verbose_name = 'Taboo Word'
+        verbose_name_plural = 'Taboo Words'
+
 # Only customers
 class Report(models.Model):
     snitch = models.ForeignKey(Customer, related_name='reports_snitch', on_delete=models.CASCADE)

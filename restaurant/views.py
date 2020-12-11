@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm
 from django.contrib.auth.decorators import login_required
-from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES
+from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES, TabooWords
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.urls import reverse
 from django.db.models import F
@@ -13,8 +13,6 @@ from uuid import uuid4
 from django.forms import DateInput
 from django import forms
 from decimal import Decimal
-
-TABOO_WORDS = ['fk', 'fu', 'shoit']
 
 # Create your views here.
 def index(request):
@@ -166,7 +164,7 @@ def filter_taboo_words(text):
     total_taboo_words = 0
     print('TEXT:', text, 'SPLIT', split_text)
     for i, word in enumerate(split_text):
-        if word in TABOO_WORDS:
+        if TabooWords.objects.filter(word = word):
             split_text[i] = '***'
             total_taboo_words += 1
 
