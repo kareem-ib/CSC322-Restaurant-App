@@ -246,7 +246,7 @@ class SpecificPostView(FormMixin, DetailView):
                 return redirect(reverse('discussion_board'))
 
             messages.warning(self.request, "Your post has some taboo words. You have been warned.")
-        
+
         form.instance.author = self.request.user.customer
         form.instance.post = self.object
         form.instance.body = body
@@ -318,7 +318,9 @@ class MenuListView(ListView):
         # Check if user is authenticated, if not show defautls
         if user.is_authenticated and Customer.is_customer(user):
             cust = Customer.get_customer(user)
+            total_cost = 0
             for item in cust.menuitems_set.all():
+                total_cost += item.quantity * item.item.price + total_cost
                 cart.append({'item': item.item.name,
                 'price': item.quantity * item.item.price,
                 'quantity': item.quantity,
@@ -326,12 +328,15 @@ class MenuListView(ListView):
                 'dish_id': item.item.pk})
             context['cart'] = cart
             context['is_VIP'] = cust.is_VIP
+            context['balance'] = cust.balance
+            context['total_cost'] = total_cost
 
         # If a customer has more than 3 orders, then we retrieve the customers top 3
         # ordered tags and return the highest rating of each tag category to be featured
         if user.is_authenticated and Customer.is_customer(user) and (len(user.customer.orders_set.all()) >= 3):
             cust = Customer.get_customer(user)
 
+            print(Orders.objects.filter(customer = cust).values('dishes'))
             dish_ids = [*map(lambda x: x['dishes'], Orders.objects.filter(customer = cust).values('dishes'))]
             dishes = [*map(lambda x: Dish.objects.get(pk=x), dish_ids)]
             tag_frequencies = {}
@@ -462,7 +467,22 @@ Function view for checkout.
 """
 @login_required
 def checkout(request):
-    return render(request, 'restaurant/checkout.html')
+    cust = Customer.objects.get(pk=request.user.id)
+    cart = []
+    total_cost = 0
+    for item in cust.menuitems_set.all():
+        total_cost += item.quantity * item.item.price + total_cost
+        cart.append({'item': item.item.name,
+        'price': item.quantity * item.item.price,
+        'quantity': item.quantity,
+        'tag': item.item.tag,
+        'dish_id': item.item.pk})
+    context = {
+        'cart': cart,
+        'total_cost': total_cost,
+        'balance': cust.balance,
+    }
+    return render(request, 'restaurant/checkout.html', context)
 
 """
 Function-based used to create an order when the takeout option is selected since takeout is a function-based
@@ -484,7 +504,23 @@ customer's balance is updated. If the customer is a VIP, they get a 10% discount
 @login_required
 def takeout(request):
     if request.method == 'GET':
-        return render(request, 'restaurant/takeout.html')
+        cust = Customer.objects.get(pk=request.user.id)
+        cart = []
+        total_cost = 0
+        for item in cust.menuitems_set.all():
+            total_cost += item.quantity * item.item.price + total_cost
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity,
+            'tag': item.item.tag,
+            'dish_id': item.item.pk,})
+
+        context = {
+            'cart': cart,
+            'total_cost': total_cost,
+            'balance': cust.balance,
+        }
+        return render(request, 'restaurant/takeout.html', context)
     elif request.method == 'POST':
         cust = Customer.objects.get(pk=request.user.id)
         chefs = Chef.objects.all()
@@ -513,7 +549,7 @@ def takeout(request):
             cust.balance = F('balance') - cost
         cust.save()
         cust.check_vip()
-        ### cust.menuitems_set.all().delete()
+        cust.menuitems_set.all().delete()
         return redirect(reverse('order_success'))
 
 """
@@ -527,6 +563,24 @@ class DeliveryCreateView(CreateView):
     # Set the redirect page upon a successful order to restaurant/order_success
     def get_success_url(self):
         return reverse('order_success')
+
+    # Override the get_context_data() function so the delivery CreateView has access to the cart
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cust = Customer.objects.get(pk=self.request.user.id)
+        cart = []
+        total_cost = 0
+        for item in cust.menuitems_set.all():
+            total_cost += item.quantity * item.item.price + total_cost
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity,
+            'tag': item.item.tag,
+            'dish_id': item.item.pk})
+        context['cart'] = cart
+        context['total_cost'] = total_cost
+        context['balance'] = cust.balance
+        return context
 
     # Override the form_valid() function.
     def form_valid(self, form):
@@ -551,7 +605,7 @@ class DeliveryCreateView(CreateView):
         cost = form.instance.cost
         ### delete the active order (MenuItem) here
 
-        #### cust.menuitems_set.all().delete()
+        cust.menuitems_set.all().delete()
 
         # Checks if the customer is a VIP to see if a discount needs to be applied
         if cust.is_VIP:
@@ -577,6 +631,24 @@ class DineInCreateView(CreateView):
     def get_success_url(self):
         return reverse('order_success')
 
+    # Override the get_context_data() function so the delivery CreateView has access to the cart
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cust = Customer.objects.get(pk=self.request.user.id)
+        cart = []
+        total_cost = 0
+        for item in cust.menuitems_set.all():
+            total_cost += item.quantity * item.item.price + total_cost
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity,
+            'tag': item.item.tag,
+            'dish_id': item.item.pk})
+        context['cart'] = cart
+        context['total_cost'] = total_cost
+        context['balance'] = cust.balance
+        return context
+
     # Override the form_valid() function.
     def form_valid(self, form):
         cust = Customer.objects.get(pk=self.request.user.id)
@@ -586,7 +658,7 @@ class DineInCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
             item.update_item_date()
-        ### delete the active order (MenuItem) here
+        cust.menuitems_set.all().delete()
         form.save()
 
         # Updates the last_ordered_date for a given Dish related to the MenuItem
