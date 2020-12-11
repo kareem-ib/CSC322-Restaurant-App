@@ -8,6 +8,11 @@
       </div>
     {% endfor %}
   {% endif %}
+  <form method="GET" action="{% url 'search' %}">
+    <input name="q" value="{{ request.GET.q }}" placeholder="search" />
+    <button class="btn btn-success" type="submit">Search</button>
+  </form>
+
   <div class="col-md-12">
     <div class="content-section row col-md-10">
       <div class="col-md-6">

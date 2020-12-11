@@ -27,7 +27,7 @@ from .models import (User,
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
-from django.db.models import F
+from django.db.models import F, Q
 from random import randrange
 from uuid import uuid4
 from django.forms import DateInput
@@ -300,6 +300,39 @@ class CreatePostView(CreateView):
         form.instance.author = Customer.objects.get(pk=self.request.user)
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
+
+def search(request):
+    query = request.GET.get('q')
+    results = Dish.objects.filter(Q(name__icontains=query) | Q(description__icontains=query))
+    context = {}
+
+    user = request.user
+    if user.is_authenticated and Customer.is_customer(user):
+        cust = Customer.get_customer(user)
+        total_cost = 0
+        cart = []
+        for item in cust.menuitems_set.all():
+            total_cost += item.quantity * item.item.price + total_cost
+            cart.append({'item': item.item.name,
+            'price': item.quantity * item.item.price,
+            'quantity': item.quantity,
+            'tag': item.item.tag,
+            'dish_id': item.item.pk})
+        context['cart'] = cart
+        context['is_VIP'] = cust.is_VIP
+        context['balance'] = cust.balance
+        context['total_cost'] = total_cost
+    
+    sorted_dishes = []
+    for tag in TAG_CHOICES:
+        dish_tag_list = results.filter(tag=tag[0])
+        # We want 3 items per slide
+        n = 3
+        divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
+        sorted_dishes.append((tag[1], divided_list))
+    
+    context['sorted_dishes'] = sorted_dishes
+    return render(request, 'restaurant/menu.html', context)
 
 """
 Class-based ListView of all menu items to be displayed on restaurant/menu.
