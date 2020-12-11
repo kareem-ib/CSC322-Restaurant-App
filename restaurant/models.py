@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.urls import reverse
-from django.db.models import F
+from django.db.models import F, Sum
 
 DINING_CHOICES = (
     ('DI', 'Dine In'),
@@ -40,6 +40,7 @@ CC_CHOICES = (
 class Customer(User):
     balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
+    is_VIP = models.BooleanField(default=False)
 
     def inc_warning(self):
         self.warnings = F('warnings') + 1
@@ -54,8 +55,12 @@ class Customer(User):
         self.check_warnings()
 
     def check_warnings(self):
-        for cust in Customer.objects.filter(warnings__gte=3):
-            cust.delete()
+        if self.is_VIP:
+            for cust in Customer.objects.filter(pk=self.pk, warnings__gte=2):
+                cust.is_VIP = False
+                cust.save()
+        else:
+            Customer.objects.filter(pk=self.pk, warnings__gte=3).delete()
 
     def get_customer(id):
         return Customer.objects.get(pk=id)
@@ -77,8 +82,15 @@ class Customer(User):
     def is_customer(user):
         return hasattr(user, 'customer')
 
+    def check_vip(self):
+        orders = Orders.objects.filter(customer = self)
+        if len(orders) >= 50 or orders.aggregate(Sum('cost'))['cost__sum'] >= 500:
+            self.is_VIP = True
+            self.save()
+
     class Meta:
-        permissions = [('has_vip', 'Has VIP permission')]
+        verbose_name = 'Customer'
+        verbose_name_plural = 'Customers'
 
 class Staff(User):
     """class Types(models.TextChoices):
@@ -333,9 +345,17 @@ class Complaints(models.Model):
         if Customer.is_customer(self.recipient):
             Customer.get_customer(self.recipient.id).inc_warning()
         elif Chef.is_chef(self.recipient):
-            Chef.objects.get(pk=self.recipient.id).inc_complaint()
+            chef = Chef.objects.get(pk=self.recipient.id)
+
+            chef.inc_warning()
+            if Customer.is_customer(self.sender).is_VIP:
+                cust.inc_warning()
         else:
-            DeliveryPerson.objects.get(pk=self.recipient.id).inc_complaint()
+            dp = DeliveryPerson.objects.get(pk=self.recipient.id)
+
+            dp.inc_warning()
+            if Customer.is_customer(self.sender).is_VIP:
+                dp.inc_warning()
         self.is_processed = True
         if not self.recipient:
             self.delete()

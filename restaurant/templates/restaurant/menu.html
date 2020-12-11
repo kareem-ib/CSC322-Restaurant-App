@@ -43,12 +43,14 @@
                     <p class="card-text">{{ item.description }}</p>
                     <p class="card-text">${{ item.price }}</p>
                     <p class="card-text">Rating: <a href="#">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
-                    <form method="POST" action="{% url 'add_to_cart' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="dish_id" value="{{ item.pk }}" />
-                      <input type="hidden" name="quantity" value="1" />
-                      <button type="submit" class="btn btn-dark text-light">Add to Cart</button>
-                    </form>
+                    {% if not item.tag == 'SP' or is_VIP %}
+                      <form method="POST" action="{% url 'add_to_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="dish_id" value="{{ item.pk }}" />
+                        <input type="hidden" name="quantity" value="1" />
+                        <button type="submit" class="btn btn-dark text-light">Add to Cart</button>
+                      </form>
+                    {% endif %}
                   </div>
                 </div>
               </div>

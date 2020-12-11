@@ -206,11 +206,14 @@ class MenuListView(ListView):
         context['sorted_dishes'] = sorted_dishes
         cart = []
         # Check if user is authenticated, if not show defautls
-        for item in Customer.get_customer(self.request.user).menuitems_set.all():
+        cust = Customer.get_customer(self.request.user)
+        for item in cust.menuitems_set.all():
             cart.append({'item': item.item.name,
             'price': item.quantity * item.item.price,
-            'quantity': item.quantity})
+            'quantity': item.quantity,
+            'tag': item.item.tag})
         context['cart'] = cart
+        context['is_VIP'] = cust.is_VIP
         return context
 
 @login_required
@@ -269,6 +272,11 @@ def takeout(request):
             cost = cost,
             dining_option = 'P'
         ).save()
+        if cust.is_VIP:
+            cust.balance = F('balance') - cost * 0.9
+        else:
+            cust.balance = F('balance') - cost
+        cust.check_vip()
         return redirect(reverse('order_success'))
 
 class DeliveryCreateView(CreateView):
@@ -296,6 +304,11 @@ class DeliveryCreateView(CreateView):
             item.update_item_date()
         # delete the active order (MenuItem) here
         # cust.menuitems_set.all().delete()
+        if cust.is_VIP:
+            cust.balance = F('balance') - cost * 0.9
+        else:
+            cust.balance = F('balance') - cost
+        cust.check_vip()
         return super().form_valid(form)
 
 class DateInputWidget(DateInput):
@@ -318,56 +331,20 @@ class DineInCreateView(CreateView):
         for item in cust.menuitems_set.all():
             item.update_item_date()
         # delete the active order (MenuItem) here
+        if cust.is_VIP:
+            cust.balance = F('balance') - cost * 0.9
+        else:
+            cust.balance = F('balance') - cost
+        cust.check_vip()
         return super().form_valid(form)
 
     class Meta:
         widgets = {'dine_in_time': DateInputWidget()}
 
-# class TakeoutCreateView(CreateView):
-#     model = Orders
-#     template_name = 'restaurant/takeout.html'
-#     fields = ['']
-
-#     def get_success_url(self):
-#         return reverse('order_success')
-
-#     def form_valid(self, form):
-
-#         # delete the active order (MenuItem) here
-#         return super().form_valid(form)
-
 @login_required
 def order_success(request):
     context = {'uuid': uuid4()}
     return render(request, 'restaurant/order_success.html', context=context)
-
-# This one
-"""class OrderCreateView(CreateView):
-    model = Order
-    template_name = 'restaurant/checkout.html'
-    fields = ['']
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
-        return context
-
-    def get_success_url(self):
-        return reverse('discussion_board')
-
-    def form_valid(self, form):
-        #Add a check for user == author
-        form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
-        form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
-        messages.success(self.request, "Your report has been received!")
-        return super().form_valid(form)"""
-
-
-"""class MenuUpdateView(UpdateView):
-    model = Order
-
-    def get(self, request):
-        if self.kwargs['pk']:"""
 
 def register(request):
     if request.method == 'POST':
