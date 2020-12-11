@@ -26,6 +26,7 @@ class Customer(User):
     balance = models.DecimalField(max_digits=25, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
     is_VIP = models.BooleanField(default=False)
+    quit_request = models.BooleanField(default=False)
 
     def inc_warning(self):
         self.warnings = F('warnings') + 1
@@ -361,6 +362,3 @@ class Complaints(models.Model):
     class Meta:
         verbose_name = 'Complaint'
         verbose_name_plural = 'Complaints'
-
-class QuitRequest(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)

@@ -60,12 +60,13 @@ class ComplaintAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super(ComplaintAdmin, self).get_queryset(request)
 
-"""@admin.Register(Chef)
-class DesignatedChef(admin.UserAdmin):"""
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ['username', 'first_name', 'last_name', 'balance', 'is_VIP', 'quit_request']
+    ordering = ['-quit_request']
 
 
 admin.site.site_header = 'Los Tres Locos'
-admin.site.register(Customer)
+admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Post)
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Dish)

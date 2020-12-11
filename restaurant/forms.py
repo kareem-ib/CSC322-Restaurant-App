@@ -110,3 +110,15 @@ class RatingForm(DishForm):
 
     class Meta(DishForm.Meta):
         fields = DishForm.Meta.fields + ('rating',)
+
+class QuitForm(forms.Form):
+    quit_request = forms.TypedChoiceField(
+        label = "Please Select a Choice",
+        choices = ((1, "Yes"), (0, "No")),
+        coerce = lambda x: bool(int(x)),
+        widget = forms.RadioSelect,
+        required = True,
+    )
+    class Meta:
+        model = Customer
+        fields = ['quit_request']

@@ -58,6 +58,7 @@ urlpatterns = [
     #path('apply/delivery_person', CreateDPView.as_view(), name='apply_dp'),
     path('apply/chef', views.apply_chef, name='apply_chef'),
     path('apply/delivery_person', views.apply_dp, name='apply_dp'),
+    path('quit/', views.quit_request, name='quit')
 ]
 
 #urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

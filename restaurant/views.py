@@ -1,9 +1,29 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from .forms import UserRegisterForm, ChefRegisterForm, DPRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm, CommentForm
+from .forms import (UserRegisterForm,
+                    ChefRegisterForm,
+                    DPRegisterForm,
+                    DepositForm,
+                    ComplimentForm,
+                    ComplaintForm,
+                    RatingForm,
+                    CommentForm,
+                    QuitForm,)
 from django.contrib.auth.decorators import login_required
-from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES, TabooWords
+from .models import (User,
+                     Customer,
+                     Post,
+                     Report,
+                     Dish,
+                     Orders,
+                     Chef,
+                     DeliveryPerson,
+                     Compliments,
+                     Complaints,
+                     Rating,
+                     TabooWords,
+                     TAG_CHOICES)
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
@@ -598,6 +618,9 @@ Function-based view for staff-registration.
 def apply(request):
     return render(request, 'restaurant/apply.html')
 
+"""
+Function-based view for a chef application.
+"""
 def apply_chef(request):
     if request.method == 'POST':
         form = ChefRegisterForm(request.POST)
@@ -610,6 +633,9 @@ def apply_chef(request):
         form = UserRegisterForm()
     return render(request, 'restaurant/apply_chef.html', {'form': form})
 
+"""
+Function-based view for a delivery person application.
+"""
 def apply_dp(request):
     if request.method == 'POST':
         form = DPRegisterForm(request.POST)
@@ -621,16 +647,6 @@ def apply_dp(request):
     else:
         form = UserRegisterForm()
     return render(request, 'restaurant/apply_dp.html', {'form': form})
-
-"""class CreateChefView(CreateView):
-    model = Chef
-    template_name = 'restaurant/apply_chef.html'
-    form_class = ChefRegisterForm
-
-class CreateDPView(CreateView):
-    model = DeliveryPerson
-    template_name = 'restaurant/apply_dp.html'
-    form_class = DPRegisterForm"""
 
 """
 Function-based view for a user's personal profile page.
@@ -760,3 +776,43 @@ class DisputeComplaintView(UpdateView):
         # Sets the is_disputed attribute to true for the manager to see.
         form.instance.is_disputed = True
         return super().form_valid(form)
+
+"""
+Class-based CreateView for when a customer chooses to quit the site.
+"""
+@login_required
+def quit_request(request):
+    customer = Customer.objects.get(pk=request.user.id)
+    if request.method == 'POST':
+        form = QuitForm(request.POST)
+        if form.is_valid():
+            customer.quit_request = form.cleaned_data.get('quit_request')
+            customer.save()
+            if customer.quit_request:
+                messages.success(request, "Your quit request has been sent to the manager. Your account will be removed and your balance will be returned to you.\
+                Sorry to see you go.")
+            else:
+                messages.success(request, "We are happy you have chosen to stay!")
+            return redirect('home')
+    else:
+        form = QuitForm()
+    return render(request, 'restaurant/quit.html', {'form': form})
+
+"""@login_required
+def deposit(request):
+    customer = Customer.objects.get(pk=request.user.id)
+    if request.method == 'POST':
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            customer.balance = customer.balance + form.cleaned_data.get('amount')
+            customer.save()
+            customer.deposit_set.create(amount=customer.balance)
+            messages.success(request, "The amount has been added to your balance!")
+            print(form.fields)
+    else:
+        form = DepositForm()
+    context = {
+        'balance': customer.balance,
+        'form': form
+    }
+    return render(request, 'restaurant/deposit.html', context)"""
