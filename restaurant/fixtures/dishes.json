@@ -1,16 +1,102 @@
 [
   {
+    "model":"restaurant.Customer",
+    "pk":1,
+    "fields":{
+      "username":"mrbeast",
+      "first_name":"Jimmy",
+      "last_name":"kimmel",
+      "password":"pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4=",
+      "balance":55.00,
+      "email":"kareem@rest.com",
+      "warnings":1,
+      "is_VIP": true
+    } 
+  },
+  {
+    "model":"restaurant.Customer",
+    "pk":2,
+    "fields":{
+     "username":"Conan",
+     "first_name":"Conan",
+     "last_name":"Brien",
+     "password":"pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4=",    
+     "balance":15.00,
+     "email":"kareem@rest.com",
+     "warnings":0,
+     "is_VIP": false
+     }
+  },
+  {
+    "model":"restaurant.Customer",
+    "pk":3,
+    "fields":{
+      "username":"jcorden",
+       "first_name":"James",
+       "last_name":"Gorden",
+       "password":"pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4=", 
+       "balance":100,
+       "email":"kareem@rest.com",
+       "warnings":0,
+       "is_VIP": false
+     }
+  },
+  {
+    "model":"restaurant.Customer",
+    "pk":4,
+    "fields":{
+      "username":"StevenS",
+      "first_name":"Steven",
+      "last_name":"Smith",
+      "password":"pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4=", 
+      "balance":120.00,
+      "email":"kareem@rest.com",
+      "warnings":3,
+      "is_VIP": true
+   }
+  },
+  {
     "model": "restaurant.chef",
     "pk": 1,
     "fields": {
       "username": "gramsay",
       "first_name": "Gordon",
       "last_name": "Ramsay",
+      "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4=" 
+    }
+  },
+  {
+    "model": "restaurant.chef",
+    "pk": 2,
+    "fields": {
+      "username": "gfieri",
+      "first_name": "Guy",
+      "last_name": "Fieri",
       "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4="
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.chef",
+    "pk": 3,
+    "fields": {
+      "username": "joliver",
+      "first_name": "Jamie",
+      "last_name": "Oliver",
+      "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4="
+    }
+  },
+  {
+    "model": "restaurant.chef",
+    "pk": 4,
+    "fields": {
+      "username": "abourdain",
+      "first_name": "Anthony",
+      "last_name": "Bourdain",
+      "password": "pbkdf2_sha256$216000$MHXnex3EPJyz$HZELlC2aXbCYiwUx1F6pchqpW1GbRyddev2bjMRanO4="
+    }
+  },
+  {
+    "model": "restaurant.Dish",
     "pk": 1,
     "fields": {
       "name": "Mozzarella Sticks",
@@ -18,83 +104,83 @@
       "description": "Classic mozzarella sticks with marinara sauce.",
       "dish_chef": 1,
       "tag": "A",
-      "image": "/media/mozzarella-sticks-4.jpg",
+      "image": "/mozzarella-sticks-4.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 2,
     "fields": {
       "name": "Fried Beer",
       "price": 19.99,
       "description": "Fried in rice bran oil",
-      "dish_chef": 1 ,
+      "dish_chef": 3,
       "tag": "SP",
-      "image": "/media/fried-beer.jpg",
+      "image": "/fried-beer.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 3,
     "fields": {
       "name": "Fries" ,
       "price": 2.99,
       "description": "Fries with housemade suace",
-      "dish_chef": 1,
+      "dish_chef": 3,
       "tag": "A",
-      "image": "/media/941f50-splendid-table-french-fries.jpg",
+      "image": "/941f50-splendid-table-french-fries.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 4,
     "fields": {
       "name":"Pork Tenderlion" ,
       "price": 110.99 ,
       "description": "Made with imported ingredients",   
-      "dish_chef": 1,
+      "dish_chef": 2,
       "tag": "P",
-      "image": "/media/perfect-pork-tenderloin-1-9.jpg",
+      "image": "/perfect-pork-tenderloin-1-9.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 5,
     "fields": {
       "name": "Steak with Garlic Butter",
       "price": 200.00,
       "description": "Freshly grilled Steak served with garlic butter",
-      "dish_chef": 1,
-      "tag": "A",
-      "image": "/media/bfv8220_Steak_With_Garlic_Butter-FB1080 copy.webp",
+      "dish_chef": 2,
+      "tag": "SP",
+      "image": "/bfv8220_Steak_With_Garlic_Butter-FB1080 copy.webp"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 6,
     "fields": {
       "name": "Ceasar Salad",
       "price": 20.00,
       "description": "Served with housemade dressing",
-      "dish_chef": 1,
+      "dish_chef": 3,
       "tag": "S",
-      "image":"/media/Caesar-Salad-Recipe-3.jpg" ,
+      "image":"/Caesar-Salad-Recipe-3.jpg" 
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 7,
     "fields": {
       "name": "Chicken Fingers",
       "price": 25.00 ,
       "description": "Tender chicken breast served with Fries",
-      "dish_chef": 1,
-      "tag": "A",
-      "image": "/media/chicken-fingers-today-main-200227_c73e99947f638328a263407fb90a9dc8.jpg",
+      "dish_chef": 3,
+      "tag": "C",
+      "image": "/chicken-fingers-today-main-200227_c73e99947f638328a263407fb90a9dc8.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 8,
     "fields": {
       "name": "Jalapeños Poppers",
@@ -102,31 +188,265 @@
       "description": "Golden fried jalapeños and white suace.",
       "dish_chef": 1,
       "tag": "A",
-      "image":"/media/jalapeno_poppers_hero.jpg" ,
+      "image":"/jalapeno_poppers_hero.jpg" 
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 9,
     "fields": {
       "name": "Apple Crumble",
       "price": 15.99 ,
       "description":"Beautifully baked choped apples with oats and brown sugar" ,
-      "dish_chef": 1,
+      "dish_chef": 2,
       "tag": "D",
-      "image": "/media/CroppedFocusedImage108081050-50-Apple-Crumble-033.jpg",
+      "image": "/CroppedFocusedImage108081050-50-Apple-Crumble-033.jpg"
     }
   },
   {
-    "model": "restaurant.dish",
+    "model": "restaurant.Dish",
     "pk": 10,
     "fields": {
       "name": "Spinach Artichoke Dip" ,
       "price": 20.00,
       "description": "Served Tortilla chips and salsa",
-      "dish_chef": 1,
-      "tag": "A",
-      "image":"/media/1382539494507.jpeg " ,
+      "dish_chef": 3,
+      "tag": "S",
+      "image":"/1382539494507.jpeg " 
     }
   },
+  {
+    "model": "restaurant.Dish",
+    "pk": 11,
+    "fields": {
+      "name": "Gold Pizza" ,
+      "price": 200,
+      "description": "The most Luxirous Pizza",
+      "dish_chef": 1,
+      "tag": "SP",
+      "image":"./pizza.png " 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 12,
+    "fields": {
+      "name": "Chicken sandwich" ,
+      "price": 50.00,
+      "description": "Served with fries",
+      "dish_chef": 2,
+      "tag": "C",
+      "image":"./chickensandwich.jpg " 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 13,
+    "fields": {
+      "name": "Braised Pork" ,
+      "price": 75.00,
+      "description": "Served in Sweet Soy Suace",
+      "dish_chef": 2,
+      "tag": "P",
+      "image":"/braised-pork-with-sweet-soy-sauce.jpg " 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 14,
+    "fields": {
+      "name": "Fried Chicken" ,
+      "price": 30.00,
+      "description": "Tender and crispy chicken",
+      "dish_chef": 2,
+      "tag": "C",
+      "image":"/friedChicken " 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 15,
+    "fields": {
+      "name": "Ice Cream Pizza" ,
+      "price": 50.00,
+      "description": "Topped with M&Ms",
+      "dish_chef": 3,
+      "tag": "D",
+      "image":"/IceCreamPizza" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 16,
+    "fields": {
+      "name": "Strawberry Poke Cake" ,
+      "price": 50.00,
+      "description": "Made out of fresh Jam",
+      "dish_chef": 1,
+      "tag": "D",
+      "image":"/strawberryCake.jpg" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 17,
+    "fields": {
+      "name": "Fudge Ice-Cream" ,
+      "price": 25.00,
+      "description": "Served with Cherry",
+      "dish_chef": 3,
+      "tag": "D",
+      "image":"/fudgeIce.jpg" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 18,
+    "fields": {
+      "name": "Shrimp and Rice" ,
+      "price": 60.00 ,
+      "description": "Made with Garlic Butter",
+      "dish_chef": 3,
+      "tag": "A",
+      "image":"/Garlic-Butter-Shrimp-with-Rice.jpg" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 19,
+    "fields": {
+      "name": "Mongolian Beef" ,
+      "price": 150,
+      "description": "Filled with Flavors",
+      "dish_chef": 3,
+      "tag": "B",
+      "image":"/Mongolian-Beef.jpg" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 20,
+    "fields": {
+      "name": "Chinese Beef" ,
+      "price":24 ,
+      "description": "Served with Broccoli",
+      "dish_chef":1 ,
+      "tag": "B",
+      "image":"/chinese-broccoli-beef.jpg" 
+    }
+  },
+  {
+    "model": "restaurant.Dish",
+    "pk": 21,
+    "fields": {
+      "name": "Spicy Stewed Beef" ,
+      "price": 75,
+      "description": "With delecious gravy",
+      "dish_chef":3 ,
+      "tag": "B",
+      "image":"/1528217430063.jpeg" 
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":1,
+    "fields":{
+      "author":"John Wick",
+      "subject":"Food Recipe",
+      "body":"hello, is it possible if i can get recipe for chicken sandwich"
+
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":2,
+    "fields":{
+      "author":"Tony Stark",
+      "subject":"Gold steak",
+      "body":"not enough gold"
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":1,
+    "fields":{
+      "author":"Jeff Bezos",
+      "subject":"Wanna buy it",
+      "body":"Give me fu restaurant"
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":2,
+    "fields":{
+      "author":"Jimmy Kimmel",
+      "subject":"bad food",
+      "body":"the food in the restaurant is so bad, fk"
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":3,
+    "fields":{
+      "author":"james messi",
+      "subject":"delivery",
+      "body":"This restaurant is very good, the food arrived right on time and its was warmed"
+
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":4,
+    "fields":{
+      "author":"kareem Timberlake",
+      "subject":"Song",
+      "body":"I would like to sing a song at the new year party."
+
+    }
+  },
+  {
+    "model":"restaurant.Post",
+    "pk":1,
+    "fields":{
+      "author":"Nic Cruz",
+      "subject":"I want to be a chef",
+      "body":"I would like to be a chef, please hire me, i can cook some stuff."
+    }
+  },
+  {
+    "model":"restaurant.Comment",
+    "pk":1,
+    "fields":{
+      "author":"James Gorden",
+      "body":"I james gorden and i am late night host",
+      "post":"I james gorden and i am late night host"
+    }
+  },
+  {
+    "model":"restaurant.Comment",
+    "pk":2,
+    "fields":{
+      "author":"Jimmy Kimmel",
+      "body":"I am also a late night night host",
+      "post":"This is an example of post, This is an example with a taboo word fu"
+    }
+  },
+  {
+    "model":"restaurant.Comment",
+    "pk":4,
+    "fields":{
+      "author":"Conan Brien",
+      "body":"My shows is the funniest and the best show",
+      "post":"This is another example of post"
+    }
+  },
+  {
+    "model":"restaurant.Comment",
+    "pk":5,
+    "fields":{
+      "author":"Steven Smith",
+      "body":"I have no idea who i am, what im doing here, please help me",
+      "post":"The is an example of post, fk it is similar to the previous one."
+    }
+  }
 ]
