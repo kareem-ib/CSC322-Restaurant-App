@@ -251,8 +251,8 @@ class Post(models.Model):
 class Comment(models.Model):
     author = models.ForeignKey(Customer, on_delete=models.CASCADE)
     time_posted = models.DateTimeField(default=timezone.now)
-    body = models.TextField(max_length=2000)
-    post = models.ForeignKey(Post, max_length=280, on_delete=models.CASCADE)
+    body = models.TextField(max_length=280)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-time_posted']

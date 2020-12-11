@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm
+from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES, TabooWords
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
+from django.views.generic.edit import FormMixin
 from django.urls import reverse
 from django.db.models import F
 from random import randrange
@@ -12,6 +13,7 @@ from uuid import uuid4
 from django.forms import DateInput
 from django import forms
 from decimal import Decimal
+from django.http import HttpResponseForbidden
 
 # Create your views here.
 
@@ -157,13 +159,6 @@ def login(request):
     return render(request, 'restaurant/login.html')
 
 """
-Class-based DetailView for viewing a specific post on the discussion board.
-"""
-class SpecificPostView(DetailView):
-    model = Post
-    context_object_name = 'post'
-
-"""
 filter_taboo_words(text) takes in a string of text and replaces all taboo words with "***"
 """
 def filter_taboo_words(text):
@@ -176,6 +171,42 @@ def filter_taboo_words(text):
             total_taboo_words += 1
 
     return ' '.join(split_text), total_taboo_words
+
+"""
+Class-based DetailView for viewing a specific post on the discussion board.
+Allows Customers to add comments to a post.
+"""
+class SpecificPostView(FormMixin, DetailView):
+    model = Post
+    template_name = 'restaurant/post_detail.html'
+    context_object_name = 'post'
+    form_class = CommentForm
+
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={'pk': self.object.pk})
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user.customer
+        form.instance.post = self.object
+        form.save()
+        return super(SpecificPostView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        context['comments'] = self.object.comment_set.all()
+        context['singular'] = len(context['comments']) == 1
+        return context
 
 """
 Class-based CreateView for creating a post on the discussion board.
@@ -579,7 +610,7 @@ class CreateReportView(CreateView):
     # Override the context so that the original post's author can be seen in the report.
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
+        context['author'] = Customer.objects.get(pk=self.kwargs['pk'])
         return context
 
     # Sends the user back to the discussion board upon successfully submitting the report.

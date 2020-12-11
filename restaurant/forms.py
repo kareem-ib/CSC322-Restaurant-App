@@ -1,9 +1,16 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Customer, Post, Compliments, Complaints, Dish
+from .models import Customer, Post, Compliments, Complaints, Dish, Comment
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit
+
+class CommentForm(forms.ModelForm):
+    body = forms.CharField(max_length=280, )
+        
+    class Meta:
+        model = Comment
+        fields = ['body']
 
 class UserRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=20, required=True)

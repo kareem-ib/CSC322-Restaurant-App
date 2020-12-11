@@ -7,7 +7,7 @@
           <a class="mr-1" href="#">{{ post.author }}</a>
           <small class="text-muted">{{ post.time_posted }}</small>
           {% if not post.author.pk == user.pk %}
-            <a href="{% url 'report' post.pk %}" class="small float-right">report</a>
+            <a href="{% url 'report' post.author.pk %}" class="small float-right">report</a>
           {% endif %}
         </div>
         <h2 class="text-truncate" style="max-width: 35rem;"><a class="article-title" href="{% url 'post_detail' post.id %}">{{ post.subject }}</a></h2>

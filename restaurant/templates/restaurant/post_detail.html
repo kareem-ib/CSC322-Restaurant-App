@@ -1,15 +1,47 @@
 {% extends 'restaurant/base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
   <article class="media content-section">
     <div class="media-body col-md-12">
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ post.author }}</a>
         <small class="text-muted">{{ post.time_posted }}</small>
+        {% if not post.author.pk == user.pk %}
+          <a href="{% url 'report' post.author.pk %}" class="small float-right">report</a>
+        {% endif %}
       </div>
       <h2 class="article-title text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ post.subject }}</h2>
       <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ post.body }}</p>
     </div>
   </article>
+  <h2 class="border-bottom mb-4">{{ comments|length }} Comment{{ singular|yesno:",s" }}:</h2>
+  {% if user.is_authenticated %}
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset class="form-group">
+          <!-- <p class="text-muted">Remember to refrain from using taboo words.</p>
+          <p class="text-muted"><strong>Note:</strong> More than 3 taboo words in a post will result in a warning.</p> -->
+          {{ form|crispy }}
+        </fieldset>
+        <div class="form-group">
+          <button class="btn btn-dark" type="submit">Submit</button>
+        </div>
+    </form>
+  {% endif %}
+  {% for comment in comments %}
+    <article class="media content-section">
+        <div class="media-body col-md-12">
+          <div class="article-metadata">
+            <a class="mr-2" href="#">{{ comment.author }}</a>
+            <small class="text-muted">{{ comment.time_posted }}</small>
+            {% if not comment.author.pk == user.pk %}
+              <a href="{% url 'report' comment.author.pk %}" class="small float-right">report</a>
+            {% endif %}
+          </div>
+          <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ comment.body }}</p>
+        </div>
+      </article>
+  {% endfor %}
 {% endblock content %}
 {% block sidebar %}
   <div class="col-md-4">
