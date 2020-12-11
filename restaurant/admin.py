@@ -47,20 +47,18 @@ class ReportAdmin(admin.ModelAdmin):
     actions = [accept_report, deny_report]
 
 class ComplimentAdmin(admin.ModelAdmin):
-    list_display = ['sender', 'recipient', 'body', 'is_processed']
+    list_display = ['sender', 'recipient', 'body']
     actions = [accept_compliment, deny_compliment]
 
     def get_queryset(self, request):
-        qs = super(ComplimentAdmin, self).get_queryset(request)
-        return qs.filter(is_processed=False)
+        return super(ComplimentAdmin, self).get_queryset(request)
 
 class ComplaintAdmin(admin.ModelAdmin):
-    list_display = ['sender', 'recipient', 'complaint_body', 'dispute_body', 'is_disputed', 'is_processed']
+    list_display = ['sender', 'recipient', 'complaint_body', 'dispute_body', 'is_disputed']
     actions = [accept_complaint, deny_complaint]
 
     def get_queryset(self, request):
-        qs = super(ComplaintAdmin, self).get_queryset(request)
-        return qs.filter(is_processed=False)
+        return super(ComplaintAdmin, self).get_queryset(request)
 
 """@admin.Register(Chef)
 class DesignatedChef(admin.UserAdmin):"""

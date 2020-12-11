@@ -290,7 +290,6 @@ class Compliments(models.Model):
     sender = models.ForeignKey(User, related_name='compliments_sender', default=1, on_delete=models.SET_NULL, null=True)
     recipient = models.ForeignKey(User, related_name='compliments_recipient', default=1, on_delete=models.SET_NULL, null=True)
     body = models.TextField(max_length=2000)
-    is_processed = models.BooleanField(default=False)
 
     def accept_compliment(self):
         if Customer.is_customer(self.recipient):
@@ -299,25 +298,23 @@ class Compliments(models.Model):
             Chef.objects.get(pk=self.recipient.id).dec_complaint()
         else:
             DeliveryPerson.objects.get(pk=self.recipient.id).dec_complaint()
-        self.is_processed = True
-        self.save()
+        
+        self.delete()
 
 
     def deny_compliment(self):
-        self.is_processed = True
-        self.save()
+        self.delete()
 
     class Meta:
         verbose_name = 'Compliment'
         verbose_name_plural = 'Compliments'
 
 class Complaints(models.Model):
-    sender = models.ForeignKey(User, related_name='complaints_sender', default=1, on_delete=models.SET_NULL, null=True)
-    recipient = models.ForeignKey(User, related_name='complaints_recipient', default=1, on_delete=models.SET_NULL, null=True)
+    sender = models.ForeignKey(User, related_name='complaints_sender', default=1, on_delete=models.CASCADE)#, null=True)
+    recipient = models.ForeignKey(User, related_name='complaints_recipient', default=1, on_delete=models.CASCADE)#, null=True)
     complaint_body = models.TextField(max_length=2000)
     dispute_body = models.TextField(max_length=2000)
     is_disputed = models.BooleanField(default=False)
-    is_processed = models.BooleanField(default=False)
 
     def accept_complaint(self):
         if not self.recipient:
@@ -337,11 +334,8 @@ class Complaints(models.Model):
             dp.inc_warning()
             if Customer.is_customer(self.sender).is_VIP:
                 dp.inc_warning()
-        self.is_processed = True
-        if not self.recipient:
-            self.delete()
-            return
-        self.save()
+        
+        self.delete()
 
     def deny_complaint(self):
         if not self.sender:
@@ -353,11 +347,8 @@ class Complaints(models.Model):
             Chef.objects.get(pk=self.sender.id).inc_complaint()
         else:
             DeliveryPerson.objects.get(pk=self.sender.id).inc_complaint()
-        self.is_processed = True
-        if not self.sender:
-            self.delete()
-            return
-        self.save()
+        
+        self.delete()
 
     class Meta:
         verbose_name = 'Complaint'
