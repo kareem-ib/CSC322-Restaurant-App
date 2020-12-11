@@ -95,13 +95,25 @@ class ComplaintCreateView(FormView):
     def get_form_kwargs(self):
         kwargs = super(ComplaintCreateView, self).get_form_kwargs()
         user = self.request.user
-        cust = user.customer
-        orders = cust.orders_set.all()
+        
+        sender = None
+        if Customer.is_customer(user):
+            sender = user.customer
+        elif DeliveryPerson.is_dp(user):
+            sender = user.deliveryperson
+        else:
+            redirect('home')
+
+        orders = sender.orders_set.all()
         lst = []
         for order in orders:
-            lst.append((order.chef_prepared.user_ptr.pk, order.chef_prepared.get_full_name()))
-            if order.delivery_person:
-                lst.append((order.delivery_person.user_ptr.pk, order.delivery_person.get_full_name()))
+            if type(sender) == Customer:
+                lst.append((order.chef_prepared.user_ptr.pk, order.chef_prepared.get_full_name()))
+                if order.delivery_person:
+                    lst.append((order.delivery_person.user_ptr.pk, order.delivery_person.get_full_name()))
+            else:
+                lst.append((order.customer.user_ptr.pk, order.customer.get_full_name()))
+        
         lst = tuple(dict.fromkeys(lst))
         kwargs['choices'] = lst
         return kwargs
