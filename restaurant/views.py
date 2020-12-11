@@ -594,15 +594,17 @@ class DeliveryCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         form.instance.delivery_person = dps[randrange(len(dps))]
 
-        form.save()
-
+        
+        order = form.save()
         # Updates the last_ordered_date for a given Dish related to the MenuItem
         menu_items = cust.menuitems_set.all()
-        form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
+        order.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         for item in cust.menuitems_set.all():
             item.update_item_date()
 
+
         cost = form.instance.cost
+        order.save()
         ### delete the active order (MenuItem) here
 
         cust.menuitems_set.all().delete()
@@ -658,16 +660,19 @@ class DineInCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
             item.update_item_date()
-        cust.menuitems_set.all().delete()
-        form.save()
+        
 
+        order = form.save()
         # Updates the last_ordered_date for a given Dish related to the MenuItem
         menu_items = cust.menuitems_set.all()
-        form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
+        order.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         for item in cust.menuitems_set.all():
             item.update_item_date()
 
         cost = form.instance.cost
+        order.save()
+
+        cust.menuitems_set.all().delete()
 
         # Checks if the customer is a VIP to see if a discount needs to be applied
         if cust.is_VIP:
