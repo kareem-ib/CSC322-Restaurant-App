@@ -235,6 +235,10 @@ class MenuListView(ListView):
         context['sorted_dishes'] = sorted_dishes
         return context
 
+class MenuDetailView(DetailView):
+    model = Dish
+    context_object_name = 'dish'
+
 @login_required
 def add_to_cart(request):
     """
@@ -263,15 +267,6 @@ def remove_from_cart(request, dish_id):"""
 @login_required
 def checkout(request):
     return render(request, 'restaurant/checkout.html')
-
-# Temporary Views for Forms
-@login_required
-def delivery(request):
-    return render(request, 'restaurant/delivery.html')
-
-@login_required
-def dinein(request):
-    return render(request, 'restaurant/dinein.html')
 
 @login_required
 def takeout(request):

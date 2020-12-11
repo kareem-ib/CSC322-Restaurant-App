@@ -1,0 +1,16 @@
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  <article class="media content-section">
+    <div class="media-body col-md-12">
+      <div class="article-metadata">
+        <a class="mr-2" href="#">{{ dish.dish_chef }}</a>
+      </div>
+      <h2 class="article-title text-break text-justify" style="max-width: 700px; word-wrap: break-word;" href="#">{{ dish.name }}</h2>
+      <img class="card-img-top" src="{{ dish.image.url }}" alt="{{ dish.name }}" height="250px">
+      <br />
+      <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;"><strong>Description: </strong>{{ dish.description }}</p>
+      <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;"><strong>Price: </strong>${{ dish.price }}</p>
+      <p class="article-content text-break text-justify"><strong>Rating: </strong><a href="#">{{ dish.avg_ratings }}/5.0</a><small class="text-muted"> {{ dish.total_ratings }} ratings</small></p>
+    </div>
+  </article>
+{% endblock content %}

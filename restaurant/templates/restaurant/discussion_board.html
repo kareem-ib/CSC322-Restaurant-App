@@ -10,7 +10,7 @@
             <a href="{% url 'report' post.pk %}" class="small float-right">report</a>
           {% endif %}
         </div>
-        <h2 class="text-truncate" style="max-width: 35rem;"><a class="article-title" href="{% url 'post_detail' post.id%}">{{ post.subject }}</a></h2>
+        <h2 class="text-truncate" style="max-width: 35rem;"><a class="article-title" href="{% url 'post_detail' post.id %}">{{ post.subject }}</a></h2>
         <p class="article-content text-truncate text-justify" style="max-width: 35rem;">{{ post.body }}</p>
       </div>
     </article>
