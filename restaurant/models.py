@@ -296,7 +296,7 @@ class Compliments(models.Model):
             Customer.get_customer(self.recipient.id).dec_warning()
         elif Chef.is_chef(self.recipient):
             chef = Chef.objects.get(pk=self.recipient.id)
-            
+
             chef.dec_complaint()
             if Customer.is_customer(self.sender) and Customer.objects.get(pk=self.sender.id).is_VIP:
                 chef.dec_complaint()
@@ -306,7 +306,7 @@ class Compliments(models.Model):
             dp.dec_complaint()
             if Customer.is_customer(self.sender).is_VIP and Customer.objects.get(pk=self.sender.id).is_VIP:
                 dp.dec_complaint()
-        
+
         self.delete()
 
 
@@ -342,7 +342,7 @@ class Complaints(models.Model):
             dp.inc_warning()
             if Customer.is_customer(self.sender) and Customer.objects.get(pk=self.sender.id).is_VIP:
                 dp.inc_warning()
-        
+
         self.delete()
 
     def deny_complaint(self):
@@ -355,9 +355,15 @@ class Complaints(models.Model):
             Chef.objects.get(pk=self.sender.id).inc_complaint()
         else:
             DeliveryPerson.objects.get(pk=self.sender.id).inc_complaint()
-        
+
         self.delete()
 
     class Meta:
         verbose_name = 'Complaint'
         verbose_name_plural = 'Complaints'
+
+"""class StaffApplication(models.Model):
+    # stuff
+
+class QuitRequest(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)"""

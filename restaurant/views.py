@@ -95,7 +95,7 @@ class ComplaintCreateView(FormView):
     def get_form_kwargs(self):
         kwargs = super(ComplaintCreateView, self).get_form_kwargs()
         user = self.request.user
-        
+
         sender = None
         if Customer.is_customer(user):
             sender = user.customer
@@ -113,7 +113,7 @@ class ComplaintCreateView(FormView):
                     lst.append((order.delivery_person.user_ptr.pk, order.delivery_person.get_full_name()))
             else:
                 lst.append((order.customer.user_ptr.pk, order.customer.get_full_name()))
-        
+
         lst = tuple(dict.fromkeys(lst))
         kwargs['choices'] = lst
         return kwargs
@@ -584,6 +584,7 @@ def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
+            form.instance.is_active = False
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, "Your account has been created! Please log in.")
