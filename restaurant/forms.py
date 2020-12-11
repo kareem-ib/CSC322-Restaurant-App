@@ -125,3 +125,23 @@ class QuitForm(forms.Form):
     class Meta:
         model = Customer
         fields = ['quit_request']
+
+class DPRatingForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        choices = kwargs['choices']
+        del kwargs['choices']
+        super(DPRatingForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.fields['dps'] = forms.TypedChoiceField(
+            label = "Delivery Person",
+            choices = choices,
+            coerce = lambda x: int(x),
+            widget = forms.RadioSelect,
+            required = True,
+        )
+        self.fields['rating'] = forms.IntegerField(min_value=0, max_value=5)
+
+    class Meta:
+        model = DeliveryPerson
+        fields = ['dps', 'rating']

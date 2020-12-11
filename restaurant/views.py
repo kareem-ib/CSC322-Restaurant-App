@@ -9,7 +9,8 @@ from .forms import (UserRegisterForm,
                     ComplaintForm,
                     RatingForm,
                     CommentForm,
-                    QuitForm,)
+                    QuitForm,
+                    DPRatingForm,)
 from django.contrib.auth.decorators import login_required
 from .models import (User,
                      Customer,
@@ -322,7 +323,7 @@ def search(request):
         context['is_VIP'] = cust.is_VIP
         context['balance'] = cust.balance
         context['total_cost'] = total_cost
-    
+
     sorted_dishes = []
     for tag in TAG_CHOICES:
         dish_tag_list = results.filter(tag=tag[0])
@@ -332,7 +333,7 @@ def search(request):
         n = 3
         divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
         sorted_dishes.append((tag[1], divided_list))
-    
+
     context['sorted_dishes'] = sorted_dishes
     return render(request, 'restaurant/menu.html', context)
 
@@ -630,7 +631,7 @@ class DeliveryCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         form.instance.delivery_person = dps[randrange(len(dps))]
 
-        
+
         order = form.save()
         # Updates the last_ordered_date for a given Dish related to the MenuItem
         menu_items = cust.menuitems_set.all()
@@ -696,7 +697,7 @@ class DineInCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
             item.update_item_date()
-        
+
 
         order = form.save()
         # Updates the last_ordered_date for a given Dish related to the MenuItem
@@ -930,3 +931,36 @@ def quit_request(request):
     else:
         form = QuitForm()
     return render(request, 'restaurant/quit.html', {'form': form})
+
+"""
+Class-based view for rating a delivery person.
+"""
+class DPRateFormView(FormView):
+    model = DeliveryPerson
+    template_name = 'restaurant/rate_dp.html'
+    form_class = DPRatingForm
+
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    def get_form_kwargs(self):
+        kwargs = super(DPRateFormView, self).get_form_kwargs()
+        user = self.request.user
+        dps = []
+        for order in Orders.objects.filter(customer=user.customer).filter(delivery_person__isnull=False):
+            dps.append((order.delivery_person.id, order.delivery_person.get_full_name()))
+        dps = tuple(dict.fromkeys(dps))
+        kwargs['choices'] = dps
+        return kwargs
+
+    def form_valid(self, form):
+        dp = DeliveryPerson.objects.get(pk=form.cleaned_data.get('dps'))
+        dp.rating = form.cleaned_data.get('rating')
+        rating = form.cleaned_data.get('rating')
+        total_ratings = dp.number_ratings
+        dp.number_ratings += 1
+        dp.avg_rating = (dp.avg_rating*total_ratings + rating) / dp.number_ratings
+        dp.save()
+
+        messages.success(self.request, "Your rating has been added!")
+        return super().form_valid(form)

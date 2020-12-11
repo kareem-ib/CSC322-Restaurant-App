@@ -15,7 +15,8 @@ from .views import (DiscussionBoardView,
                     DeliveryCreateView,
                     DineInCreateView,
                     ComplaintCreateView,
-                    ComplimentCreateView,)
+                    ComplimentCreateView,
+                    DPRateFormView,)
 #                    TakeoutCreateView)
 
 from . import views
@@ -59,6 +60,7 @@ urlpatterns = [
     #path('apply/delivery_person', CreateDPView.as_view(), name='apply_dp'),
     path('apply/chef', views.apply_chef, name='apply_chef'),
     path('apply/delivery_person', views.apply_dp, name='apply_dp'),
+    path('rate/delivery_person', login_required(DPRateFormView.as_view()), name='rate_dp'),
     path('quit/', views.quit_request, name='quit')
 ]
 

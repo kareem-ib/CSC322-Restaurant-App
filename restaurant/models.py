@@ -198,8 +198,10 @@ A DeliveryPerson is a type of Staff. A DeliveryPerson also has their own ratings
 by Customers.
 """
 class DeliveryPerson(Staff):
-    #rating = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
-
+    rating = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    number_ratings = models.IntegerField(default=0)
+    avg_rating = models.FloatField(default=0)
+    
     # Checks if the user is a delivery person.
     def is_dp(user):
         return hasattr(user, 'deliveryperson')
