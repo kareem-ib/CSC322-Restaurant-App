@@ -8,6 +8,7 @@ from .views import (DiscussionBoardView,
                     CreateReportView,
                     DisputeListView,
                     DisputeUpdateView,
+                    DisputeComplaintView,
                     MenuListView,
                     MenuDetailView,
                     RateCreateView,
@@ -50,7 +51,8 @@ urlpatterns = [
     path('report/<int:pk>', login_required(CreateReportView.as_view()), name='report'),
     path('report/', login_required(CreateReportView.as_view()), name='report'),
     path('dispute/', login_required(DisputeListView.as_view()), name='dispute'),
-    path('dispute/<int:pk>', login_required(DisputeUpdateView.as_view()), name='dispute'),
+    path('dispute/report/<int:pk>', login_required(DisputeUpdateView.as_view()), name='dispute'),
+    path('dispute/complaint/<int:pk>', login_required(DisputeComplaintView.as_view()), name='dispute_complaint'),
 ]
 
 #urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

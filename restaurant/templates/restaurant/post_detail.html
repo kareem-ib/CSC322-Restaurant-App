@@ -30,17 +30,17 @@
   {% endif %}
   {% for comment in comments %}
     <article class="media content-section">
-        <div class="media-body col-md-12">
-          <div class="article-metadata">
-            <a class="mr-2" href="#">{{ comment.author }}</a>
-            <small class="text-muted">{{ comment.time_posted }}</small>
-            {% if not comment.author.pk == user.pk %}
-              <a href="{% url 'report' comment.author.pk %}" class="small float-right">report</a>
-            {% endif %}
-          </div>
-          <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ comment.body }}</p>
+      <div class="media-body col-md-12">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">{{ comment.author }}</a>
+          <small class="text-muted">{{ comment.time_posted }}</small>
+          {% if not comment.author.pk == user.pk %}
+            <a href="{% url 'report' comment.author.pk %}" class="small float-right">report</a>
+          {% endif %}
         </div>
-      </article>
+        <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;">{{ comment.body }}</p>
+      </div>
+    </article>
   {% endfor %}
 {% endblock content %}
 {% block sidebar %}
@@ -49,7 +49,7 @@
       <h4>Discussion Board Actions</h4>
       <p class='text-muted'>
         <a href="{% url 'make_post' %}" class="list-group-item list-group-item-dark">Make a Post</a>
-        <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute Reports</a>
+        <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute Complaints or Reports</a>
       </p>
     </div>
   </div>

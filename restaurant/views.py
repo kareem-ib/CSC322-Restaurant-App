@@ -608,6 +608,22 @@ def profile(request):
             messages.info(request, 'You have 0 warnings. Keep it up!')
         elif cust.warnings < 0:
             messages.success(request, 'You have ' + str(-1*cust.warnings) + ' compliment(s). Nice job!')
+
+        reports = Report.objects.filter(complainee=request.user.id)
+        m = 0
+        for report in reports:
+            if not report.is_disputed:
+                m += 1
+        if m > 0:
+            messages.warning(request, 'You have ' + str(m) + ' report(s) against you. Please click "Dispute Complaints or Reports" if you wish to dispute.')
+
+        complaints = Complaints.objects.filter(recipient=request.user.id)
+        n = 0
+        for complaint in complaints:
+            if not complaint.is_disputed:
+                n += 1
+        if n > 0:
+            messages.warning(request, 'You have ' + str(n) + ' complaint(s) against you. Please click "Dispute Complaints or Reports" if you wish to dispute.')
     return render(request, 'restaurant/profile.html')
 
 """
@@ -642,14 +658,18 @@ Class-based ListView for when a customer chooses to view reports made against th
 class DisputeListView(ListView):
     model = Report
     template_name = 'restaurant/dispute_list.html'
-    context_object_name = 'reports'
+    #context_object_name = 'reports'
     # Sort unprocessed reports by time reported with the most recent report being the first one.
     ordering = ['-time_reported']
 
-    # Override the get_queryset() function to return a queryset that has been filtered to only include
-    # reports filed against the user viewing the page.
-    def get_queryset(self):
-        return Report.objects.filter(complainee=self.request.user.id)
+    # Override the get_context_data() function so that the DisputeListView has access to both reports
+    # and complaints.
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if Customer.is_customer(self.request.user):
+            context['reports'] = Report.objects.filter(complainee=self.request.user.id)
+        context['complaints'] = Complaints.objects.filter(recipient=self.request.user)
+        return context
 
 """
 Class-based UpdateView for when a customer chooses to dispute a report made against them.
@@ -663,6 +683,31 @@ class DisputeUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['snitch'] = Report.objects.get(pk=self.kwargs['pk']).snitch
+        return context
+
+    # Redirect the user back to the discussion board after successfully submitting the dispute.
+    def get_success_url(self):
+        return reverse('discussion_board')
+
+    # Override the form_valid() function.
+    def form_valid(self, form):
+        messages.success(self.request, "Your dispute has been received!")
+        # Sets the is_disputed attribute to true for the manager to see.
+        form.instance.is_disputed = True
+        return super().form_valid(form)
+
+"""
+Class-based UpdateView for when a customer chooses to dispute a complaint made against them.
+"""
+class DisputeComplaintView(UpdateView):
+    model = Complaints
+    template_name = 'restaurant/dispute_complaint.html'
+    fields = ['dispute_body']
+
+    # Override the context so that the user sees who reported them.
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sender'] = Complaints.objects.get(pk=self.kwargs['pk']).sender
         return context
 
     # Redirect the user back to the discussion board after successfully submitting the dispute.

@@ -17,13 +17,13 @@
   {% endfor %}
 {% endblock content %}
 {% block sidebar %}
-<div class="col-md-4">
-  <div class="content-section">
-    <h4>Discussion Board Actions</h4>
-    <p class='text-muted'>
-      <a href="{% url 'make_post' %}" class="list-group-item list-group-item-dark">Make a Post</a>
-      <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute Reports</a>
-    </p>
+  <div class="col-md-4">
+    <div class="content-section">
+      <h4>Discussion Board Actions</h4>
+      <p class='text-muted'>
+        <a href="{% url 'make_post' %}" class="list-group-item list-group-item-dark">Make a Post</a>
+        <a href="{% url 'dispute' %}" class="list-group-item list-group-item-dark">Dispute Complaints or Reports</a>
+      </p>
+    </div>
   </div>
-</div>
 {% endblock sidebar %}
