@@ -1,0 +1,10 @@
+{% extends 'restaurant/base.html' %}
+{% block content %}
+  <div class="col-md-10">
+    <h2>Select the Role You Want to Apply For</h2>
+    <a class="btn btn-md btn-dark text-light" href="{% url 'apply_chef' %}">Chef</a>
+    <a class="btn btn-md btn-dark text-light" href="{% url 'apply_dp' %}">Delivery Person</a>
+  </div>
+  <br />
+  {% block apply %}{% endblock apply %}
+{% endblock content %}

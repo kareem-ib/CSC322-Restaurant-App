@@ -39,7 +39,7 @@ urlpatterns = [
     path('menu/rate/<int:pk>', login_required(RateCreateView.as_view()), name='rate'),
     path('menu/add/', views.add_to_cart, name='add_to_cart'),
     path('menu/remove/', views.remove_from_cart, name='remove_from_cart'),
-    path('checkout', views.checkout, name='checkout'),
+    path('checkout/', views.checkout, name='checkout'),
     path('checkout/delivery', login_required(DeliveryCreateView.as_view()), name='delivery'),
     path('checkout/dinein', login_required(DineInCreateView.as_view()), name='dinein'),
     path('checkout/takeout', views.takeout, name='takeout'),
@@ -53,6 +53,11 @@ urlpatterns = [
     path('dispute/', login_required(DisputeListView.as_view()), name='dispute'),
     path('dispute/report/<int:pk>', login_required(DisputeUpdateView.as_view()), name='dispute'),
     path('dispute/complaint/<int:pk>', login_required(DisputeComplaintView.as_view()), name='dispute_complaint'),
+    path('apply/', views.apply, name='apply'),
+    #path('apply/chef', CreateChefView.as_view(), name='apply_chef'),
+    #path('apply/delivery_person', CreateDPView.as_view(), name='apply_dp'),
+    path('apply/chef', views.apply_chef, name='apply_chef'),
+    path('apply/delivery_person', views.apply_dp, name='apply_dp'),
 ]
 
 #urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

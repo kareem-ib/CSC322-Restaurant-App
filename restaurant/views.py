@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
-from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm, CommentForm
+from .forms import UserRegisterForm, ChefRegisterForm, DPRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES, TabooWords
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
@@ -586,12 +586,51 @@ def register(request):
         if form.is_valid():
             form.instance.is_active = False
             form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, "Your account has been created! Please log in.")
+            messages.success(request, "Your application has been sent to be reviewed by the manager. Please await approval before logging in.")
             return redirect('login')
     else:
         form = UserRegisterForm()
     return render(request, 'restaurant/register.html', {'form': form})
+
+"""
+Function-based view for staff-registration.
+"""
+def apply(request):
+    return render(request, 'restaurant/apply.html')
+
+def apply_chef(request):
+    if request.method == 'POST':
+        form = ChefRegisterForm(request.POST)
+        if form.is_valid():
+            form.instance.is_active = False
+            form.save()
+            messages.success(request, "Your application has been sent to be reviewed by the manager. Please await approval before logging in.")
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'restaurant/apply_chef.html', {'form': form})
+
+def apply_dp(request):
+    if request.method == 'POST':
+        form = DPRegisterForm(request.POST)
+        if form.is_valid():
+            form.instance.is_active = False
+            form.save()
+            messages.success(request, "Your application has been sent to be reviewed by the manager. Please await approval before logging in.")
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'restaurant/apply_dp.html', {'form': form})
+
+"""class CreateChefView(CreateView):
+    model = Chef
+    template_name = 'restaurant/apply_chef.html'
+    form_class = ChefRegisterForm
+
+class CreateDPView(CreateView):
+    model = DeliveryPerson
+    template_name = 'restaurant/apply_dp.html'
+    form_class = DPRegisterForm"""
 
 """
 Function-based view for a user's personal profile page.

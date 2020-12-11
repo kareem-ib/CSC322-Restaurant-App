@@ -362,8 +362,5 @@ class Complaints(models.Model):
         verbose_name = 'Complaint'
         verbose_name_plural = 'Complaints'
 
-"""class StaffApplication(models.Model):
-    # stuff
-
 class QuitRequest(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)"""
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
