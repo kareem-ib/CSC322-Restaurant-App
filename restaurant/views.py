@@ -327,6 +327,8 @@ def search(request):
     for tag in TAG_CHOICES:
         dish_tag_list = results.filter(tag=tag[0])
         # We want 3 items per slide
+        if not dish_tag_list:
+            continue
         n = 3
         divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
         sorted_dishes.append((tag[1], divided_list))
