@@ -295,9 +295,17 @@ class Compliments(models.Model):
         if Customer.is_customer(self.recipient):
             Customer.get_customer(self.recipient.id).dec_warning()
         elif Chef.is_chef(self.recipient):
-            Chef.objects.get(pk=self.recipient.id).dec_complaint()
+            chef = Chef.objects.get(pk=self.recipient.id)
+            
+            chef.dec_complaint()
+            if Customer.is_customer(self.sender) and Customer.objects.get(pk=self.sender.id).is_VIP:
+                chef.dec_complaint()
         else:
-            DeliveryPerson.objects.get(pk=self.recipient.id).dec_complaint()
+            dp = DeliveryPerson.objects.get(pk=self.recipient.id)
+
+            dp.dec_complaint()
+            if Customer.is_customer(self.sender).is_VIP and Customer.objects.get(pk=self.sender.id).is_VIP:
+                dp.dec_complaint()
         
         self.delete()
 
@@ -326,13 +334,13 @@ class Complaints(models.Model):
             chef = Chef.objects.get(pk=self.recipient.id)
 
             chef.inc_warning()
-            if Customer.is_customer(self.sender).is_VIP:
-                cust.inc_warning()
+            if Customer.is_customer(self.sender) and Customer.objects.get(pk=self.sender.id).is_VIP:
+                chef.inc_warning()
         else:
             dp = DeliveryPerson.objects.get(pk=self.recipient.id)
 
             dp.inc_warning()
-            if Customer.is_customer(self.sender).is_VIP:
+            if Customer.is_customer(self.sender) and Customer.objects.get(pk=self.sender.id).is_VIP:
                 dp.inc_warning()
         
         self.delete()
