@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db.models import F, Sum
 from django.core.validators import MaxValueValidator, MinValueValidator
+from datetime import datetime, timedelta
 
 DINING_CHOICES = (
     ('DI', 'Dine In'),
@@ -142,13 +143,17 @@ class Chef(Staff):
     # Checks if the chef is set for a promotion when their complaints are greater than
     # or equal to 3.
     def check_demotion(self):
+        self.check_ratings()
         for chef in Chef.objects.filter(complaints__gte=3):
             chef.complaints = F('complaints') - 3
             # 20% decrease upon demotion
-            chef.salary = F('salary') * 0.8
-            chef.demotions = F('demotions') + 1
+            self.demote(chef)
             chef.save()
-        self.check_fired()
+
+    def demote(self, chef):
+        chef.salary = F('salary') * 0.8
+        chef.demotions = F('demotions') + 1
+        chef.check_fired()
 
     # Checks if the chef is elligible for being fired (when they have been demoted twice).
     def check_fired(self):
@@ -157,11 +162,30 @@ class Chef(Staff):
     # Checks if the chef is set for a promotion when their complaints are less
     # than or equal to -3 (which is the same as 3 compliments).
     def check_promotion(self):
+        self.check_ratings()
         for chef in Chef.objects.filter(complaints__lte=-3):
+            # reset these 3 compliments
             chef.complaints = F('complaints') + 3
             # 10% increase upon promotion
-            chef.salary = F('salary') * 1.1
+            self.promote(chef)
             chef.save()
+
+    def promote(self, chef):
+        chef.salary = F('salary') * 1.1
+
+    def check_ratings(self):
+        today = timezone.now()
+        past_3_days = today - timedelta(days=3)
+
+        for dish in self.dish_set.all():
+            total_ratings = dish.total_ratings
+            avg_ratings = dish.avg_ratings
+
+            if dish.last_ordered_date < past_3_days or (total_ratings % 10 == 0 and avg_ratings <= 2.0):
+                self.demote(self)
+            
+            if (total_ratings % 10 == 0 and avg_ratings >= 4.0):
+                self.promote(self)
 
     # Sets a designated chef permission for Chefs. If a given chef has this permission, he/she is
     # granted access to the admin page where they can only add dishes.

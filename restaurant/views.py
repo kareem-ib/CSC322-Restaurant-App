@@ -451,6 +451,7 @@ class RateCreateView(CreateView):
             form.instance.dish.avg_ratings = (rating + avg_ratings*total_ratings) / form.instance.dish.total_ratings
         print(form.instance.dish.avg_ratings)
         form.instance.dish.save()
+        form.instance.dish.dish_chef.check_ratings()
         messages.success(self.request, 'Your rating has been added!')
         return super().form_valid(form)
 

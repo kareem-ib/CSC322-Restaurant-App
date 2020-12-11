@@ -1,6 +1,11 @@
 {% extends 'restaurant/base.html' %}
 {% load static %}
 {% block override %}
+  
+  <form method="GET" action="{% url 'search' %}">
+    <input name="q" value="{{ request.GET.q }}" placeholder="search" />
+    <button class="btn btn-success" type="submit">Search</button>
+  </form>
   {% if messages %}
     {% for message in messages %}
       <div class="alert alert-{{ message.tags }}">
@@ -8,10 +13,6 @@
       </div>
     {% endfor %}
   {% endif %}
-  <form method="GET" action="{% url 'search' %}">
-    <input name="q" value="{{ request.GET.q }}" placeholder="search" />
-    <button class="btn btn-success" type="submit">Search</button>
-  </form>
 
   <div class="col-md-12">
     <div class="content-section row col-md-10">
