@@ -39,7 +39,7 @@ CC_CHOICES = (
 )
 
 class Customer(User):
-    balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    balance = models.DecimalField(max_digits=25, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
     is_VIP = models.BooleanField(default=False)
 
@@ -280,6 +280,8 @@ class Orders(models.Model):
 
     class Meta:
         ordering = ['-order_date']
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
 
 class Post(models.Model):
     author = models.ForeignKey(Customer, on_delete=models.CASCADE)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Post, Report, Dish, Chef, DeliveryPerson, Complaints, Compliments
+from .models import Customer, Post, Report, Dish, Chef, DeliveryPerson, Complaints, Compliments, Orders
 from django.contrib.admin.models import LogEntry
 
 # Register your models here.
@@ -75,3 +75,4 @@ admin.site.register(Chef)
 admin.site.register(DeliveryPerson)
 admin.site.register(Compliments, ComplimentAdmin)
 admin.site.register(Complaints, ComplaintAdmin)
+admin.site.register(Orders)
