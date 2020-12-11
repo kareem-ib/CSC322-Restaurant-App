@@ -12,6 +12,7 @@ from random import randrange
 from uuid import uuid4
 from django.forms import DateInput
 from django import forms
+from decimal import Decimal
 
 TABOO_WORDS = ['fk', 'fu', 'shoit']
 
@@ -209,9 +210,10 @@ class MenuListView(ListView):
         context = super().get_context_data(**kwargs)
         sorted_dishes = []
         cart = []
+        user = self.request.user
         # Check if user is authenticated, if not show defautls
-        if self.request.user.is_authenticated:
-            cust = Customer.get_customer(self.request.user)
+        if user.is_authenticated and Customer.is_customer(user):
+            cust = Customer.get_customer(user)
             for item in cust.menuitems_set.all():
                 cart.append({'item': item.item.name,
                 'price': item.quantity * item.item.price,
@@ -219,12 +221,37 @@ class MenuListView(ListView):
                 'tag': item.item.tag})
             context['cart'] = cart
             context['is_VIP'] = cust.is_VIP
+        
+        # If a customer has more than 3 orders, then we retrieve the customers top 3
+        # ordered tags and return the highest rating of each tag category to be featured
+        if user.is_authenticated and Customer.is_customer(user) and (len(user.customer.orders_set.all()) >= 3):
+            cust = Customer.get_customer(user)
+
+            dish_ids = [*map(lambda x: x['dishes'], Orders.objects.filter(customer = cust).values('dishes'))]
+            dishes = [*map(lambda x: Dish.objects.get(pk=x), dish_ids)]
+            tag_frequencies = {}
+            for tag in TAG_CHOICES:
+                tag_frequencies[tag[0]] = 0
+            for dish in dishes:
+                tag_frequencies[dish.tag] += 1
+
+            # get the most frequent tag and pop it
+            def getpop():
+                tag = max(tag_frequencies, key=tag_frequencies.get)
+                tag_frequencies.pop(tag)
+                return tag
+
+            highest_3_tags = [getpop() for i in range(3)]
+            
+            featured_dishes = [*map(lambda x: Dish.objects.filter(tag=x).order_by('-avg_ratings').first(), highest_3_tags)]
+            sorted_dishes.append(('Featured', [featured_dishes]))
         else:
             top_3_ordered = Dish.objects.all().order_by('-num_of_orders')[0:3]
             top_3_rated = Dish.objects.all().order_by('-avg_ratings')[0:3]
 
             sorted_dishes.append(('Featured', [list(top_3_ordered), list(top_3_rated)]))
 
+        
         for tag in TAG_CHOICES:
             dish_tag_list = Dish.objects.filter(tag=tag[0])
             # We want 3 items per slide
@@ -310,6 +337,15 @@ def remove_from_cart(request, dish_id):"""
 def checkout(request):
     return render(request, 'restaurant/checkout.html')
 
+def create_order(**kwargs):
+    order = Orders(
+                customer = kwargs['customer'],
+                chef_prepared = kwargs['chef_prepared'],
+                cost = kwargs['cost'],
+                dining_option = 'P')
+    order.save()
+    return order
+
 @login_required
 def takeout(request):
     if request.method == 'GET':
@@ -319,20 +355,27 @@ def takeout(request):
         chefs = Chef.objects.all()
         chef_prepared = chefs[randrange(len(chefs))]
         cost = cust.get_cart_price()
-        for item in cust.menuitems_set.all():
+        menu_items = cust.menuitems_set.all()
+
+        for item in menu_items:
             item.update_item_date()
         print('TAKEOUT WORKS')
-        Orders(
+        order = create_order(
             customer = cust,
             chef_prepared = chef_prepared,
             cost = cost,
             dining_option = 'P'
-        ).save()
+        )
+
+        order.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
+        order.save()
+
         if cust.is_VIP:
-            cust.balance = F('balance') - cost * 0.9
+            cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
         cust.check_vip()
+        # cust.menuitems_set.all().delete()
         return redirect(reverse('order_success'))
 
 class DeliveryCreateView(CreateView):
@@ -340,30 +383,36 @@ class DeliveryCreateView(CreateView):
     template_name = 'restaurant/delivery.html'
     fields = ['delivery_address']
 
-    """def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
-        return context"""
-
     def get_success_url(self):
         return reverse('order_success')
 
     def form_valid(self, form):
         cust = Customer.objects.get(pk=self.request.user.id)
         form.instance.customer = cust
+
         chefs = Chef.objects.all()
         dps = DeliveryPerson.objects.all()
+
         form.instance.chef_prepared = chefs[randrange(len(chefs))]
         form.instance.cost = cust.get_cart_price()
         form.instance.delivery_person = dps[randrange(len(dps))]
+
+        form.save()
+
+        menu_items = cust.menuitems_set.all()
+        form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         for item in cust.menuitems_set.all():
             item.update_item_date()
+
+        cost = form.instance.cost
         # delete the active order (MenuItem) here
-        # cust.menuitems_set.all().delete()
+
+        #### cust.menuitems_set.all().delete()
         if cust.is_VIP:
-            cust.balance = F('balance') - cost * 0.9
+            cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
+        cust.save()
         cust.check_vip()
         return super().form_valid(form)
 
@@ -387,8 +436,16 @@ class DineInCreateView(CreateView):
         for item in cust.menuitems_set.all():
             item.update_item_date()
         # delete the active order (MenuItem) here
+        form.save()
+
+        menu_items = cust.menuitems_set.all()
+        form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
+        for item in cust.menuitems_set.all():
+            item.update_item_date()
+
+        cost = form.instance.cost
         if cust.is_VIP:
-            cust.balance = F('balance') - cost * 0.9
+            cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
         cust.check_vip()
