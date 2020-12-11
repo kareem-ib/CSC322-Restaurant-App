@@ -27,15 +27,19 @@
               </form>
           {% endfor %}
         </ul>
-        <p><strong>Your Balance: </strong>${{ balance }}</p>
-        <p><strong>Total Cost: </strong>${{ total_cost }}</p>
+        {% if user.is_authenticated %}
+          <p><strong>Your Balance: </strong>${{ balance }}</p>
+          <p><strong>Total Cost: </strong>${{ total_cost }}</p>
+        {% endif %}
       </div>
       {% if balance >= total_cost %}
       <div class="col-md-6">
           <a class="btn btn-dark text-light float-right" href="{% url 'checkout' %}">Proceed to Checkout</a>
       </div>
       {% else %}
-        <strong>Your balance is lower than the total cost. Please <a href="{% url 'deposit' %}">make a deposit</a>.</strong>
+        {% if user.is_authenticated %}
+          <strong>Your balance is lower than the total cost. Please <a href="{% url 'deposit' %}">make a deposit</a>.</strong>
+        {% endif %}
       {% endif %}
     </div>
     {% for dish in sorted_dishes %}
