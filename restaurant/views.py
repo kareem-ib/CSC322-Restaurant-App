@@ -778,7 +778,7 @@ class DisputeComplaintView(UpdateView):
         return super().form_valid(form)
 
 """
-Class-based CreateView for when a customer chooses to quit the site.
+Function-based view for users requesting to quit the site.
 """
 @login_required
 def quit_request(request):
@@ -797,22 +797,3 @@ def quit_request(request):
     else:
         form = QuitForm()
     return render(request, 'restaurant/quit.html', {'form': form})
-
-"""@login_required
-def deposit(request):
-    customer = Customer.objects.get(pk=request.user.id)
-    if request.method == 'POST':
-        form = DepositForm(request.POST)
-        if form.is_valid():
-            customer.balance = customer.balance + form.cleaned_data.get('amount')
-            customer.save()
-            customer.deposit_set.create(amount=customer.balance)
-            messages.success(request, "The amount has been added to your balance!")
-            print(form.fields)
-    else:
-        form = DepositForm()
-    context = {
-        'balance': customer.balance,
-        'form': form
-    }
-    return render(request, 'restaurant/deposit.html', context)"""
