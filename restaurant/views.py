@@ -228,8 +228,28 @@ class SpecificPostView(FormMixin, DetailView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
+        body, taboo_words = filter_taboo_words(form.instance.body)
+
+        # Concatenate the lists of taboo words in the post subject and body.
+        taboo_words = taboo_words
+
+        # Checks the number of taboo words.
+        if taboo_words > 0:
+            # A user receives a warning for using at least one taboo word
+            Customer.objects.get(pk=self.request.user).inc_warning()
+
+            # If there are more than 3 taboo words, the post is not sent to the discussion board,
+            # the customer is redirected back to the discussion board, and is notified that their
+            # post contains too many taboo words.
+            if taboo_words > 3:
+                messages.error(self.request, "Your post has too many taboo words.")
+                return redirect(reverse('discussion_board'))
+
+            messages.warning(self.request, "Your post has some taboo words. You have been warned.")
+        
         form.instance.author = self.request.user.customer
         form.instance.post = self.object
+        form.instance.body = body
         form.save()
         return super(SpecificPostView, self).form_valid(form)
 
