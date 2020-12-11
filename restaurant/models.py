@@ -21,12 +21,35 @@ TAG_CHOICES = (
     ('D', 'Desserts')
 )
 
+SENDER_CHOICES = (
+    ('C', 'Customer'),
+    ('DP', 'Delivery Person')
+)
+
+RECIPIENT_CHOICES = (
+    ('C', 'Customer'),
+    ('DP', 'Delivery Person'),
+    ('CH', 'Chef')
+)
+
+CC_CHOICES = (
+    ('CA', 'Complaint'),
+    ('CI', 'Compliment')
+)
+
 class Customer(User):
     balance = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
 
     def inc_warning(self):
         self.warnings = F('warnings') + 1
+        self.save()
+        self.check_warnings()
+
+    def dec_warning(self):
+        # Customer's warnings can be negative. This implies that compliments
+        # can be stored to cancel out future warnings.
+        self.warnings = F('warnings') - 1
         self.save()
         self.check_warnings()
 
@@ -51,6 +74,9 @@ class Customer(User):
             price = price + item.quantity * item.item.price
         return price
 
+    def is_customer(user):
+        return hasattr(user, 'customer')
+
     class Meta:
         permissions = [('has_vip', 'Has VIP permission')]
 
@@ -59,11 +85,12 @@ class Staff(User):
         CHEF = 'CHEF', 'Chef'
         DP = 'DP', 'Delivery Person'"""
 
-    #type = models.CharField(_('Type'), max_length=50, choices=Types.choices)
-    # Might end up just using 1, + compliments, 0 equal, - complaints
+    # Complaints is used as a counter for both compliments and complaints.
+    # A negative value implies the given staff member has more compliments
+    # than complaints.
     complaints = models.IntegerField(default=0)
-    compliments = models.IntegerField(default=0)
     salary = models.DecimalField(max_digits=7, decimal_places=2, default=12500)
+    demotions = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -79,8 +106,42 @@ class Staff(User):
 class Chef(Staff):
     #objects = ChefManager()
 
+    def is_chef(user):
+        return hasattr(user, 'chef')
+
     def is_desig_chef(self):
         return self.has_perm('restaurant.has_desig_chef')
+
+    def inc_complaint(self):
+        self.complaints = F('complaints') + 1
+        self.save()
+        self.check_demotion()
+
+    def dec_complaint(self):
+        # Staff's complaints can be negative. This implies that compliments
+        # can be stored to cancel out future complaints.
+        self.complaints = F('complaints') - 1
+        self.save()
+        self.check_promotion()
+
+    def check_demotion(self):
+        for chef in Chef.objects.filter(complaints__gte=3):
+            chef.complaints = F('complaints') - 3
+            # 20% decrease upon demotion
+            chef.salary = F('salary') * 0.8
+            chef.demotions = F('demotions') + 1
+            chef.save()
+        self.check_fired()
+
+    def check_fired(self):
+        Chef.objects.filter(demotions__gte=2).delete()
+
+    def check_promotion(self):
+        for chef in Chef.objects.filter(complaints__lte=-3):
+            chef.complaints = F('complaints') + 3
+            # 10% increase upon promotion
+            chef.salary = F('salary') * 1.1
+            chef.save()
 
     class Meta:
         permissions = [('has_desig_chef', 'Has Designated chef permission')]
@@ -94,6 +155,40 @@ class Chef(Staff):
 
 class DeliveryPerson(Staff):
     #objects = DeliveryPersonManager()
+
+    def is_dp(user):
+        return hasattr(user, 'deliveryperson')
+
+    def inc_complaint(self):
+        self.complaints = F('complaints') + 1
+        self.save()
+        self.check_demotion()
+
+    def dec_complaint(self):
+        # Staff's complaints can be negative. This implies that compliments
+        # can be stored to cancel out future complaints.
+        self.complaints = F('complaints') - 1
+        self.save()
+        self.check_promotion()
+
+    def check_demotion(self):
+        for dp in DeliveryPerson.objects.filter(complaints__gte=3):
+            dp.complaints = F('complaints') - 3
+            # 20% decrease upon demotion
+            dp.salary = F('salary') * 0.8
+            dp.demotions = F('demotions') + 1
+            dp.save()
+        self.check_fired()
+
+    def check_fired(self):
+        DeliveryPerson.objects.filter(demotions__gte=2).delete()
+
+    def check_promotion(self):
+        for dp in DeliveryPerson.objects.filter(complaints__lte=-3):
+            dp.complaints = F('complaints') + 3
+            # 10% increase upon promotion
+            dp.salary = F('salary') * 1.1
+            dp.save()
 
     class Meta:
         verbose_name = 'Delivery Person'
@@ -119,6 +214,7 @@ class Dish(models.Model):
     tag = models.CharField(choices=TAG_CHOICES, max_length=2)
     image = models.ImageField(upload_to='img')
     last_ordered_date = models.DateTimeField(default=timezone.now)
+    #num_of_orders = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -184,8 +280,8 @@ class Post(models.Model):
 class Report(models.Model):
     snitch = models.ForeignKey(Customer, related_name='reports_snitch', on_delete=models.CASCADE)
     complainee = models.ForeignKey(Customer, related_name='reports_complainee', on_delete=models.CASCADE)
-    report_body = models.TextField()
-    dispute_body = models.TextField()
+    report_body = models.TextField(max_length=2000)
+    dispute_body = models.TextField(max_length=2000)
     is_disputed = models.BooleanField(default = False)
     time_reported = models.DateTimeField(default=timezone.now)
 
@@ -197,33 +293,71 @@ class Report(models.Model):
         self.snitch.inc_warning()
         self.delete()
 
-class UnproccessedComplaint(models.Model):
-    class SnitchType(models.TextChoices):
-        CUSTOMER = 'CUST', _('Customers')
-        DP = 'DP', _('Delivery Person')
+class Compliments(models.Model):
+    sender = models.ForeignKey(User, related_name='compliments_sender', default=1, on_delete=models.SET_NULL, null=True)
+    recipient = models.ForeignKey(User, related_name='compliments_recipient', default=1, on_delete=models.SET_NULL, null=True)
+    body = models.TextField(max_length=2000)
+    is_processed = models.BooleanField(default=False)
 
-    class ComplaineeType(models.TextChoices):
-        CUSTOMER = 'CUST', _('Customers')
-        DP = 'DP', _('Delivery Person')
-        CHEF = 'CHEF', _('Chef')
-
-    snitch_type = models.CharField(max_length=4, choices=SnitchType.choices)
-    snitch_id = models.IntegerField()
-    complainee_type = models.CharField(max_length=4, choices=ComplaineeType.choices)
-    complainee_id = models.IntegerField()
-    complaint_body = models.TextField()
-    dispute_body = models.TextField()
-
-    def resolveSnitchType(self):
-        if self.snitch_type == UnproccessedComplaint.SnitchType.CUSTOMER:
-            return Customers.objects.get(pk=self.complainee_id)
+    def accept_compliment(self):
+        if Customer.is_customer(self.recipient):
+            Customer.get_customer(self.recipient.id).dec_warning()
+        elif Chef.is_chef(self.recipient):
+            Chef.objects.get(pk=self.recipient.id).dec_complaint()
         else:
-            return DeliveryPerson.objects.get(pk=self.complainee_id)
+            DeliveryPerson.objects.get(pk=self.recipient.id).dec_complaint()
+        self.is_processed = True
+        self.save()
 
-    def resolveComplaineeType(self):
-        if self.complainee_type == UnproccessedComplaint.ComplaineeType.CUSTOMER:
-            return Customer.objects.get(pk=self.complainee_id)
-        elif self.complainee_type == UnproccessedComplaint.ComplaineeType.DP:
-            return DeliveryPerson.objects.get(pk=self.complainee_id)
+
+    def deny_compliment(self):
+        self.is_processed = True
+        self.save()
+
+    class Meta:
+        verbose_name = 'Compliment'
+        verbose_name_plural = 'Compliments'
+
+class Complaints(models.Model):
+    sender = models.ForeignKey(User, related_name='complaints_sender', default=1, on_delete=models.SET_NULL, null=True)
+    recipient = models.ForeignKey(User, related_name='complaints_recipient', default=1, on_delete=models.SET_NULL, null=True)
+    complaint_body = models.TextField(max_length=2000)
+    dispute_body = models.TextField(max_length=2000)
+    is_disputed = models.BooleanField(default=False)
+    is_processed = models.BooleanField(default=False)
+
+    def accept_complaint(self):
+        if not self.recipient:
+            self.delete()
+            return
+        if Customer.is_customer(self.recipient):
+            Customer.get_customer(self.recipient.id).inc_warning()
+        elif Chef.is_chef(self.recipient):
+            Chef.objects.get(pk=self.recipient.id).inc_complaint()
         else:
-            return Chef.objects.get(pk=self.complainee_id)
+            DeliveryPerson.objects.get(pk=self.recipient.id).inc_complaint()
+        self.is_processed = True
+        if not self.recipient:
+            self.delete()
+            return
+        self.save()
+
+    def deny_complaint(self):
+        if not self.sender:
+            self.delete()
+            return
+        if Customer.is_customer(self.sender):
+            Customer.get_customer(self.sender.id).inc_warning()
+        elif Chef.is_chef(self.sender):
+            Chef.objects.get(pk=self.sender.id).inc_complaint()
+        else:
+            DeliveryPerson.objects.get(pk=self.sender.id).inc_complaint()
+        self.is_processed = True
+        if not self.sender:
+            self.delete()
+            return
+        self.save()
+
+    class Meta:
+        verbose_name = 'Complaint'
+        verbose_name_plural = 'Complaints'

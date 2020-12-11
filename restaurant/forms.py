@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Customer, Post
+from .models import Customer, Post, Compliments, Complaints
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit
 
 class UserRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=20, required=True)
@@ -19,3 +21,51 @@ class DepositForm(forms.Form):
 
     class Meta:
         fields = ['amount', 'card_number']
+
+class ComplimentForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        choices = kwargs['choices']
+        del kwargs['choices']
+        super(ComplimentForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.fields['recipient'] = forms.TypedChoiceField(
+            label = "Recipient",
+            choices = choices,
+            coerce = lambda x: int(x),
+            widget = forms.RadioSelect,
+            required = True,
+        )
+        self.fields['body'] = forms.CharField(
+            label = "Body",
+            required = True,
+            max_length = Compliments._meta.get_field('body').max_length
+        )
+
+    class Meta:
+        model = Compliments
+        fields = ['recipient', 'body']
+
+class ComplaintForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        choices = kwargs['choices']
+        del kwargs['choices']
+        super(ComplaintForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.fields['recipient'] = forms.TypedChoiceField(
+            label = "Recipient",
+            choices = choices,
+            coerce = lambda x: int(x),
+            widget = forms.RadioSelect,
+            required = True,
+        )
+        self.fields['complaint_body'] = forms.CharField(
+            label = "Body",
+            required = True,
+            max_length = Complaints._meta.get_field('complaint_body').max_length
+        )
+
+    class Meta:
+        model = Complaints
+        fields = ['recipient', 'complaint_body']

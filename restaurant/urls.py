@@ -10,7 +10,9 @@ from .views import (DiscussionBoardView,
                     DisputeUpdateView,
                     MenuListView,
                     DeliveryCreateView,
-                    DineInCreateView,)
+                    DineInCreateView,
+                    ComplaintCreateView,
+                    ComplimentCreateView,)
 #                    TakeoutCreateView)
 
 from . import views
@@ -19,7 +21,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('about/', views.about, name='about'),
-    path('complaint_compliment/', views.complaint_compliment, name='complaint_compliment'),
+    path('complain/', login_required(ComplaintCreateView.as_view()), name='complain'),
+    path('compliment/', login_required(ComplimentCreateView.as_view()), name='compliment'),
     path('deposit/', views.deposit, name='deposit'),
     #path('discussion_board/', views.discussion_board, name='discussion_board'),
     path('discussion_board/', DiscussionBoardView.as_view(), name='discussion_board'),

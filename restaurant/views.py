@@ -2,15 +2,16 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 #from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm, DepositForm#, PostForm
+from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm
 from django.contrib.auth.decorators import login_required
-from .models import Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, TAG_CHOICES
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, TAG_CHOICES
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.urls import reverse
 from django.db.models import F
 from random import randrange
 from uuid import uuid4
 from django.forms import DateInput
+from django import forms
 
 TABOO_WORDS = ['fk', 'fu', 'shoit']
 
@@ -27,6 +28,68 @@ def about(request):
 def complaint_compliment(request):
     return render(request, 'restaurant/complaint_compliment.html')
 
+class ComplimentCreateView(FormView):
+    model = Compliments
+    template_name = 'restaurant/compliment.html'
+    #fields = ['recipient', 'body']
+    form_class = ComplimentForm
+
+    def get_success_url(self):
+        return reverse('home')
+
+    def get_form_kwargs(self):
+        kwargs = super(ComplimentCreateView, self).get_form_kwargs()
+        user = self.request.user
+        cust = user.customer
+        orders = cust.orders_set.all()
+        lst = []
+        for order in orders:
+            lst.append((order.chef_prepared.user_ptr.pk, order.chef_prepared.get_full_name()))
+            if order.delivery_person:
+                lst.append((order.delivery_person.user_ptr.pk, order.delivery_person.get_full_name()))
+        lst = tuple(dict.fromkeys(lst))
+        kwargs['choices'] = lst
+        return kwargs
+
+    def form_valid(self, form):
+        print("form valid")
+        self.request.user.compliments_sender.create(recipient=User.objects.get(pk=form.cleaned_data.get('recipient')),
+                                                    body=form.cleaned_data.get('body'))
+
+        messages.success(self.request, "Your compliment has been received!")
+        return super().form_valid(form)
+
+class ComplaintCreateView(FormView):
+    model = Complaints
+    template_name = 'restaurant/complaint.html'
+    #fields = ['recipient', 'body']
+    form_class = ComplaintForm
+
+    def get_success_url(self):
+        return reverse('home')
+
+    def get_form_kwargs(self):
+        kwargs = super(ComplaintCreateView, self).get_form_kwargs()
+        user = self.request.user
+        cust = user.customer
+        orders = cust.orders_set.all()
+        lst = []
+        for order in orders:
+            lst.append((order.chef_prepared.user_ptr.pk, order.chef_prepared.get_full_name()))
+            if order.delivery_person:
+                lst.append((order.delivery_person.user_ptr.pk, order.delivery_person.get_full_name()))
+        lst = tuple(dict.fromkeys(lst))
+        kwargs['choices'] = lst
+        return kwargs
+
+    def form_valid(self, form):
+        print("form valid")
+        self.request.user.complaints_sender.create(recipient=User.objects.get(pk=form.cleaned_data.get('recipient')),
+                                                   complaint_body=form.cleaned_data.get('complaint_body'))
+
+        messages.success(self.request, "Your complaint has been received!")
+        return super().form_valid(form)
+
 @login_required
 def deposit(request):
     customer = Customer.objects.get(pk=request.user.id)
@@ -39,6 +102,7 @@ def deposit(request):
             customer.save()
             customer.deposit_set.create(amount=customer.balance)
             messages.success(request, "The amount has been added to your balance!")
+            print(form.fields)
     else:
         form = DepositForm()
     # user's current balance goes here
@@ -124,12 +188,6 @@ class CreatePostView(CreateView):
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
 
-'''def menu(request):
-    # user's personalized dishes go here
-    # menu goes here
-    return render(request, 'restaurant/menu.html')
-'''
-
 class MenuListView(ListView):
     model = Dish
     template_name = 'restaurant/menu.html'
@@ -204,7 +262,7 @@ def takeout(request):
         cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
             item.update_item_date()
-        print('TAKEOUT WORKS')    
+        print('TAKEOUT WORKS')
         Orders(
             customer = cust,
             chef_prepared = chef_prepared,
@@ -258,7 +316,7 @@ class DineInCreateView(CreateView):
         form.instance.chef_prepared = chefs[randrange(len(chefs))]
         form.instance.cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
-            item.update_item_date()        
+            item.update_item_date()
         # delete the active order (MenuItem) here
         return super().form_valid(form)
 
@@ -274,7 +332,7 @@ class DineInCreateView(CreateView):
 #         return reverse('order_success')
 
 #     def form_valid(self, form):
-        
+
 #         # delete the active order (MenuItem) here
 #         return super().form_valid(form)
 
@@ -377,7 +435,3 @@ class DisputeUpdateView(UpdateView):
         messages.success(self.request, "Your dispute has been received!")
         form.instance.is_disputed = True
         return super().form_valid(form)
-
-'''@login_required
-def dispute(request):
-    return render(request, 'restaurant/dispute.html')'''
