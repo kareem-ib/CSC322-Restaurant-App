@@ -664,7 +664,7 @@ Class-based CreateView for when the customer picks their dining option as "Dine 
 class DineInCreateView(CreateView):
     model = Orders
     template_name = 'restaurant/dinein.html'
-    fields = ['dine_in_time']
+    fields = ['dine_in_time', 'number_seats']
 
     # Set the redirect page upon a successful order to restaurant/order_success
     def get_success_url(self):

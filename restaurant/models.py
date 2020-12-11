@@ -183,7 +183,7 @@ class Chef(Staff):
 
             if dish.last_ordered_date < past_3_days or (total_ratings % 10 == 0 and avg_ratings <= 2.0):
                 self.demote(self)
-            
+
             if (total_ratings % 10 == 0 and avg_ratings >= 4.0):
                 self.promote(self)
 
@@ -201,7 +201,7 @@ class DeliveryPerson(Staff):
     rating = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     number_ratings = models.IntegerField(default=0)
     avg_rating = models.FloatField(default=0)
-    
+
     # Checks if the user is a delivery person.
     def is_dp(user):
         return hasattr(user, 'deliveryperson')
@@ -336,6 +336,7 @@ class Orders(models.Model):
     dining_option = models.CharField(choices=DINING_CHOICES, max_length=2, default='D')
     delivery_address = models.CharField(max_length=200, null=True)
     delivery_person = models.ForeignKey(DeliveryPerson, on_delete=models.SET_NULL, null=True)
+    number_seats = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(20)])
 
     # Sets the naming convention and ordering for Orders in the admin page.
     class Meta:
