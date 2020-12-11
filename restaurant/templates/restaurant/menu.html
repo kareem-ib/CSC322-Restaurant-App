@@ -42,7 +42,7 @@
                     <h4 class="card-title"><a class="article-title" href="{% url 'menu_detail' item.pk %}">{{ item.name }}</a></h4>
                     <p class="card-text">{{ item.description }}</p>
                     <p class="card-text">${{ item.price }}</p>
-                    <p class="card-text">Rating: <a href="#">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
+                    <p class="card-text">Rating: <a href="{% url 'rate' item.pk %}">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
                     {% if not item.tag == 'SP' or is_VIP %}
                       <form method="POST" action="{% url 'add_to_cart' %}">
                         {% csrf_token %}

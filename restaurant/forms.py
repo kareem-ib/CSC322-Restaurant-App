@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Customer, Post, Compliments, Complaints
+from .models import Customer, Post, Compliments, Complaints, Dish
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, ButtonHolder, Submit
 
@@ -69,3 +69,17 @@ class ComplaintForm(forms.Form):
     class Meta:
         model = Complaints
         fields = ['recipient', 'complaint_body']
+
+class DishForm(forms.ModelForm):
+    class Meta:
+        model = Dish
+        fields = ()
+
+class RatingForm(DishForm):
+    rating = forms.IntegerField(min_value=0, max_value=5)
+
+    def __init__(self, *args, **kwargs):
+        super(RatingForm, self).__init__(*args, **kwargs)
+
+    class Meta(DishForm.Meta):
+        fields = DishForm.Meta.fields + ('rating',)
