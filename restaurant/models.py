@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import F, Sum
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 DINING_CHOICES = (
     ('DI', 'Dine In'),
@@ -234,6 +235,10 @@ class Dish(models.Model):
     class Meta:
         verbose_name = 'Dish'
         verbose_name_plural = 'Dishes'
+
+class Rating(models.Model):
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
 
 # A given customer's active cart
 class MenuItems(models.Model):

@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm
 from django.contrib.auth.decorators import login_required
-from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, TAG_CHOICES
+from .models import User, Customer, Post, Report, Dish, Orders, Chef, DeliveryPerson, Compliments, Complaints, Rating, TAG_CHOICES
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.urls import reverse
 from django.db.models import F
@@ -239,18 +239,45 @@ class MenuDetailView(DetailView):
     model = Dish
     context_object_name = 'dish'
 
-class RateUpdateView(UpdateView):
-    model = Dish
+class RateCreateView(CreateView):
+    """model = Dish
     template_name = 'restaurant/rate.html'
     form_class = RatingForm
 
     def get_success_url(self):
         return reverse('menu')
 
-    """def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)"""
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
     def form_valid(self, form):
+        rating = DishForm.instance.rating
+        form.instance.total_ratings = F('total_ratings') + 1
+        form.instance.avg_ratings = (rating + F('avg_ratings')) / F('total_ratings')
+        messages.success(self.request, 'Your rating has been added!')
+        return super().form_valid(form)"""
+
+    model = Rating
+    template_name = 'restaurant/rate.html'
+    fields = ['rating']
+
+    def get_success_url(self):
+        return reverse('menu')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['dish'] = Dish.objects.get(pk=self.kwargs['pk'])
+        return context
+
+    def form_valid(self, form):
+        rating = form.instance.rating
+        form.instance.dish = Dish.objects.get(pk=self.kwargs['pk'])
+        total_ratings = form.instance.dish.total_ratings
+        avg_ratings = form.instance.dish.avg_ratings
+        form.instance.dish.total_ratings = total_ratings + 1
+        form.instance.dish.avg_ratings = (rating + avg_ratings*total_ratings) / form.instance.dish.total_ratings
+        print(form.instance.dish.avg_ratings)
+        form.instance.dish.save()
         messages.success(self.request, 'Your rating has been added!')
         return super().form_valid(form)
 
