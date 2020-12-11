@@ -461,15 +461,16 @@ def register(request):
 
 @login_required
 def profile(request):
-    cust = Customer.objects.filter(pk=request.user.id).first()
-    if cust.warnings == 2:
-        messages.error(request, 'YOU HAVE 2 WARNINGS. ONE MORE WARNING WILL GET YOU REMOVED FROM THE SITE.')
-    elif cust.warnings == 1:
-        messages.warning(request, 'You have 1 warning. Be careful!')
-    elif cust.warnings == 0:
-        messages.info(request, 'You have 0 warnings. Keep it up!')
-    elif cust.warnings < 0:
-        messages.success(request, 'You have ' + str(-1*cust.warnings) + ' compliments. Nice job!')
+    if Customer.is_customer(request.user):
+        cust = Customer.objects.filter(pk=request.user.id).first()
+        if cust.warnings == 2:
+            messages.error(request, 'YOU HAVE 2 WARNINGS. ONE MORE WARNING WILL GET YOU REMOVED FROM THE SITE.')
+        elif cust.warnings == 1:
+            messages.warning(request, 'You have 1 warning. Be careful!')
+        elif cust.warnings == 0:
+            messages.info(request, 'You have 0 warnings. Keep it up!')
+        elif cust.warnings < 0:
+            messages.success(request, 'You have ' + str(-1*cust.warnings) + ' compliments. Nice job!')
     return render(request, 'restaurant/profile.html')
 
 '''@login_required
