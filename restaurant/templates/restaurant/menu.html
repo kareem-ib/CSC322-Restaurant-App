@@ -39,7 +39,7 @@
                   <!-- item.name here as id for redirecting purposes upon refresh? -->
                   <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" height="250px">
                   <div class="card-body">
-                    <h4 class="card-title">{{ item.name }}</h4>
+                    <h4 class="card-title"><a class="article-title" href="{% url 'menu_detail' item.pk %}">{{ item.name }}</a></h4>
                     <p class="card-text">{{ item.description }}</p>
                     <p class="card-text">${{ item.price }}</p>
                     <p class="card-text">Rating: <a href="#">{{ item.avg_ratings }}/5.0</a><small class="text-muted"> {{ item.total_ratings }} ratings</small></p>
