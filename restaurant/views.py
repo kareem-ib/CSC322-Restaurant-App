@@ -159,6 +159,9 @@ class SpecificPostView(DetailView):
     model = Post
     context_object_name = 'post'
 
+"""
+filter_taboo_words(text) takes in a string of text and replaces all taboo words with "***"
+"""
 def filter_taboo_words(text):
     split_text = text.split()
     total_taboo_words = 0
@@ -173,19 +176,29 @@ def filter_taboo_words(text):
 class CreatePostView(CreateView):
     model = Post
     template_name = 'restaurant/make_post.html'
+    # Sets the form's fields according to the Post model
     fields = ['subject', 'body']
 
+    # Redirects the user back to the discussion board upon a successful post.
     def get_success_url(self):
         return reverse('discussion_board')
 
+    # Overrides the form_valid() function
     def form_valid(self, form):
         body, taboo_words_1 = filter_taboo_words(form.instance.body)
         subject, taboo_words_2 = filter_taboo_words(form.instance.subject)
 
+        # Concatenate the lists of taboo words in the post subject and body.
         taboo_words = taboo_words_1 + taboo_words_2
 
+        # Checks the number of taboo words.
         if taboo_words > 0:
+            # A user receives a warning for using at least one taboo word
             Customer.objects.get(pk=self.request.user).inc_warning()
+
+            # If there are more than 3 taboo words, the post is not sent to the discussion board,
+            # the customer is redirected back to the discussion board, and is notified that their
+            # post contains too many taboo words.
             if taboo_words > 3:
                 messages.error(self.request, "Your post has too many taboo words.")
                 return redirect(reverse('discussion_board'))
@@ -198,10 +211,13 @@ class CreatePostView(CreateView):
         messages.success(self.request, "Your post has been added!")
         return super().form_valid(form)
 
+"""
+Class-based ListView of all menu items to be displayed on restaurant/menu.
+"""
 class MenuListView(ListView):
     model = Dish
     template_name = 'restaurant/menu.html'
-    #context_object_name = 'dishes'
+    # Order the dishes by their tag value
     ordering = ['tag']
 
     def get_context_data(self, **kwargs):
@@ -250,7 +266,9 @@ class MenuListView(ListView):
 
             sorted_dishes.append(('Featured', [list(top_3_ordered), list(top_3_rated)]))
 
-
+        # Iterates through the TAG_CHOICES to create lists of length 3 for the carousel slides in the HTML file
+        # Note: The carousel is currently not working, so the menu items are simply displayed in rows of three
+        # dishes.
         for tag in TAG_CHOICES:
             dish_tag_list = Dish.objects.filter(tag=tag[0])
             # We want 3 items per slide
@@ -261,23 +279,34 @@ class MenuListView(ListView):
         context['sorted_dishes'] = sorted_dishes
         return context
 
+"""
+Class-based DetailView for each dish. Pages URLs are of form /restaurant/menu/<int:pk> as described
+in restaurant/views.py.
+"""
 class MenuDetailView(DetailView):
     model = Dish
     context_object_name = 'dish'
 
+"""
+Class-based CreateView for ratings.
+"""
 class RateCreateView(CreateView):
     model = Rating
     template_name = 'restaurant/rate.html'
     fields = ['rating']
 
+    # Redirect back to the menu after successfully rating a dish
     def get_success_url(self):
         return reverse('menu')
 
+    # Override get_context_data() so the form for restaurant/rate.html to have access to the dishes
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['dish'] = Dish.objects.get(pk=self.kwargs['pk'])
         return context
 
+    # Override form_valid()
+    # Dish ratings are updated here. VIP ratings are counted twice.
     def form_valid(self, form):
         cust = Customer.objects.get(pk=self.request.user.id)
         rating = form.instance.rating
@@ -295,12 +324,14 @@ class RateCreateView(CreateView):
         messages.success(self.request, 'Your rating has been added!')
         return super().form_valid(form)
 
+"""
+Function-based view for adding to cart. This is called every time the "Add to Cart" button is pressed.
+The user is just redirected back to the menu page with the updated cart.
+"""
 @login_required
 def add_to_cart(request):
-    """
-    On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.
-    """
-    print("On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.")
+    #On Windows, this function may give WinError10053, but it still works.
+    print("On Windows, this function may give WinError10053, but it still works.")
     if request.method == 'POST':
         cust = Customer.objects.get(pk=request.user.id)
         # index 0 to just grab the Cart object instead of the tuple of (Cart, Boolean)
@@ -332,10 +363,17 @@ def remove_from_cart(request):
         cart.all().filter(item=item).first().delete()
         return redirect('menu')
 
+"""
+Function view for checkout.
+"""
 @login_required
 def checkout(request):
     return render(request, 'restaurant/checkout.html')
 
+"""
+Function-based used to create an order when the takeout option is selected since takeout is a function-based
+view.
+"""
 def create_order(**kwargs):
     order = Orders(
                 customer = kwargs['customer'],
@@ -345,6 +383,10 @@ def create_order(**kwargs):
     order.save()
     return order
 
+"""
+Takeout function-based view for when a customer chooses to order takeout. When the order is placed, the
+customer's balance is updated. If the customer is a VIP, they get a 10% discount.
+"""
 @login_required
 def takeout(request):
     if request.method == 'GET':
@@ -356,6 +398,7 @@ def takeout(request):
         cost = cust.get_cart_price()
         menu_items = cust.menuitems_set.all()
 
+        # Updates the last_ordered_date for a given Dish related to the MenuItem
         for item in menu_items:
             item.update_item_date()
         print('TAKEOUT WORKS')
@@ -369,22 +412,29 @@ def takeout(request):
         order.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         order.save()
 
+        # Checks if the customer is a VIP to see if a discount needs to be applied
         if cust.is_VIP:
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
+        cust.save()
         cust.check_vip()
-        # cust.menuitems_set.all().delete()
+        ### cust.menuitems_set.all().delete()
         return redirect(reverse('order_success'))
 
+"""
+Class-based CreateView for when the customer picks their dining option as "Delivery."
+"""
 class DeliveryCreateView(CreateView):
     model = Orders
     template_name = 'restaurant/delivery.html'
     fields = ['delivery_address']
 
+    # Set the redirect page upon a successful order to restaurant/order_success
     def get_success_url(self):
         return reverse('order_success')
 
+    # Override the form_valid() function.
     def form_valid(self, form):
         cust = Customer.objects.get(pk=self.request.user.id)
         form.instance.customer = cust
@@ -398,15 +448,18 @@ class DeliveryCreateView(CreateView):
 
         form.save()
 
+        # Updates the last_ordered_date for a given Dish related to the MenuItem
         menu_items = cust.menuitems_set.all()
         form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         for item in cust.menuitems_set.all():
             item.update_item_date()
 
         cost = form.instance.cost
-        # delete the active order (MenuItem) here
+        ### delete the active order (MenuItem) here
 
         #### cust.menuitems_set.all().delete()
+
+        # Checks if the customer is a VIP to see if a discount needs to be applied
         if cust.is_VIP:
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
@@ -418,14 +471,19 @@ class DeliveryCreateView(CreateView):
 class DateInputWidget(DateInput):
     input_type = 'date'
 
+"""
+Class-based CreateView for when the customer picks their dining option as "Dine In."
+"""
 class DineInCreateView(CreateView):
     model = Orders
     template_name = 'restaurant/dinein.html'
     fields = ['dine_in_time']
 
+    # Set the redirect page upon a successful order to restaurant/order_success
     def get_success_url(self):
         return reverse('order_success')
 
+    # Override the form_valid() function.
     def form_valid(self, form):
         cust = Customer.objects.get(pk=self.request.user.id)
         form.instance.customer = cust
@@ -434,30 +492,40 @@ class DineInCreateView(CreateView):
         form.instance.cost = cust.get_cart_price()
         for item in cust.menuitems_set.all():
             item.update_item_date()
-        # delete the active order (MenuItem) here
+        ### delete the active order (MenuItem) here
         form.save()
 
+        # Updates the last_ordered_date for a given Dish related to the MenuItem
         menu_items = cust.menuitems_set.all()
         form.instance.dishes.add(*list(map(lambda x: x['item'], menu_items.values('item'))))
         for item in cust.menuitems_set.all():
             item.update_item_date()
 
         cost = form.instance.cost
+
+        # Checks if the customer is a VIP to see if a discount needs to be applied
         if cust.is_VIP:
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
+        cust.save()
         cust.check_vip()
         return super().form_valid(form)
 
     class Meta:
         widgets = {'dine_in_time': DateInputWidget()}
 
+"""
+Function-based view for the order success page. Users will be redirected here upon completion of their order.
+"""
 @login_required
 def order_success(request):
     context = {'uuid': uuid4()}
     return render(request, 'restaurant/order_success.html', context=context)
 
+"""
+Function-based view for user-registration.
+"""
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -470,8 +538,12 @@ def register(request):
         form = UserRegisterForm()
     return render(request, 'restaurant/register.html', {'form': form})
 
+"""
+Function-based view for a user's personal profile page.
+"""
 @login_required
 def profile(request):
+    # Checks a user's warning count to output a Django flash message corresponding to the number of warnings.
     if Customer.is_customer(request.user):
         cust = Customer.objects.filter(pk=request.user.id).first()
         if cust.warnings == 2:
@@ -481,56 +553,71 @@ def profile(request):
         elif cust.warnings == 0:
             messages.info(request, 'You have 0 warnings. Keep it up!')
         elif cust.warnings < 0:
-            messages.success(request, 'You have ' + str(-1*cust.warnings) + ' compliments. Nice job!')
+            messages.success(request, 'You have ' + str(-1*cust.warnings) + ' compliment(s). Nice job!')
     return render(request, 'restaurant/profile.html')
 
-'''@login_required
-def report(request):
-    return render(request, 'restaurant/report.html')'''
-
+"""
+Class-based CreateView for when a customer files a report against another customer for misbehaving on the
+discussion board.
+"""
 class CreateReportView(CreateView):
     model = Report
     template_name = 'restaurant/report.html'
     fields = ['report_body']
 
+    # Override the context so that the original post's author can be seen in the report.
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['author'] = Post.objects.get(pk=self.kwargs['pk']).author
         return context
 
+    # Sends the user back to the discussion board upon successfully submitting the report.
     def get_success_url(self):
         return reverse('discussion_board')
 
+    # Overrides the form_valid() function
     def form_valid(self, form):
-        #Add a check for user == author
         form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
         form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
         messages.success(self.request, "Your report has been received!")
         return super().form_valid(form)
 
+"""
+Class-based ListView for when a customer chooses to view reports made against them.
+"""
 class DisputeListView(ListView):
     model = Report
     template_name = 'restaurant/dispute_list.html'
     context_object_name = 'reports'
+    # Sort unprocessed reports by time reported with the most recent report being the first one.
     ordering = ['-time_reported']
 
+    # Override the get_queryset() function to return a queryset that has been filtered to only include
+    # reports filed against the user viewing the page.
     def get_queryset(self):
         return Report.objects.filter(complainee=self.request.user.id)
 
+"""
+Class-based UpdateView for when a customer chooses to dispute a report made against them.
+"""
 class DisputeUpdateView(UpdateView):
     model = Report
     template_name = 'restaurant/dispute_form.html'
     fields = ['dispute_body']
 
+    # Override the context so that the user sees who reported them.
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['snitch'] = Report.objects.get(pk=self.kwargs['pk']).snitch
         return context
 
+    # Redirect the user back to the discussion board after successfully submitting the dispute.
     def get_success_url(self):
         return reverse('discussion_board')
 
+    # Override the form_valid() function.
     def form_valid(self, form):
         messages.success(self.request, "Your dispute has been received!")
+        # Sets the is_disputed attribute to true for the manager to see.
         form.instance.is_disputed = True
         return super().form_valid(form)
