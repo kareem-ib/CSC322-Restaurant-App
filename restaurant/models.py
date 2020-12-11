@@ -264,7 +264,7 @@ class MenuItems(models.Model):
 
 class Orders(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    #dishes = models.ManyToManyField(MenuItems)
+    dishes = models.ManyToManyField(Dish)
     chef_prepared = models.ForeignKey(Chef, on_delete=models.SET_NULL, null=True)
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     dine_in_time = models.DateTimeField(null=True)
