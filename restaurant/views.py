@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-#from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm, DepositForm, ComplimentForm, ComplaintForm, RatingForm
 from django.contrib.auth.decorators import login_required
@@ -15,27 +14,33 @@ from django import forms
 from decimal import Decimal
 
 # Create your views here.
+
+"""
+Function-based view for the index page.
+"""
 def index(request):
-    #return HttpResponse('Welcome to the restaurant')
     return render(request, 'restaurant/index.html')
 
+"""
+Function-based view for the about page.
+"""
 def about(request):
     return render(request, 'restaurant/about.html')
-    #return HttpResponse('About Page')
 
-@login_required
-def complaint_compliment(request):
-    return render(request, 'restaurant/complaint_compliment.html')
-
+"""
+Class-based FormView for filing a compliment for another user you have interacted with.
+"""
 class ComplimentCreateView(FormView):
     model = Compliments
     template_name = 'restaurant/compliment.html'
-    #fields = ['recipient', 'body']
+    # References the form ComplimentForm in forms.py
     form_class = ComplimentForm
 
     def get_success_url(self):
         return reverse('home')
 
+    # Overrides the **kwargs for the given view.
+    # Returns the list of users that the user viewing the page can file a compliment for.
     def get_form_kwargs(self):
         kwargs = super(ComplimentCreateView, self).get_form_kwargs()
         user = self.request.user
@@ -61,6 +66,7 @@ class ComplimentCreateView(FormView):
         kwargs['choices'] = lst
         return kwargs
 
+    # Overrides the form_valid() function.
     def form_valid(self, form):
         print("form valid")
         self.request.user.compliments_sender.create(recipient=User.objects.get(pk=form.cleaned_data.get('recipient')),
@@ -69,15 +75,21 @@ class ComplimentCreateView(FormView):
         messages.success(self.request, "Your compliment has been received!")
         return super().form_valid(form)
 
+"""
+Class-based FormView for filing a complaint for another user you have interacted with.
+"""
 class ComplaintCreateView(FormView):
     model = Complaints
     template_name = 'restaurant/complaint.html'
-    #fields = ['recipient', 'body']
+    # References the form ComplaintForm in forms.py
     form_class = ComplaintForm
 
+    # Redirect the user back to the home page upon submitting a complaint successfully.
     def get_success_url(self):
         return reverse('home')
 
+    # Overrides the **kwargs for the given view.
+    # Returns the list of users that the user viewing the page can file a complaint for.
     def get_form_kwargs(self):
         kwargs = super(ComplaintCreateView, self).get_form_kwargs()
         user = self.request.user
@@ -92,6 +104,7 @@ class ComplaintCreateView(FormView):
         kwargs['choices'] = lst
         return kwargs
 
+    # Overrides the form_valid() function.
     def form_valid(self, form):
         print("form valid")
         self.request.user.complaints_sender.create(recipient=User.objects.get(pk=form.cleaned_data.get('recipient')),
@@ -100,14 +113,15 @@ class ComplaintCreateView(FormView):
         messages.success(self.request, "Your complaint has been received!")
         return super().form_valid(form)
 
+"""
+Function-based view for the deposit page.
+"""
 @login_required
 def deposit(request):
     customer = Customer.objects.get(pk=request.user.id)
     if request.method == 'POST':
         form = DepositForm(request.POST)
         if form.is_valid():
-            #customer.update(balance=customer.balance + form.cleaned_data.get('amount'))
-            #customer.refresh_from_db()
             customer.balance = customer.balance + form.cleaned_data.get('amount')
             customer.save()
             customer.deposit_set.create(amount=customer.balance)
@@ -115,46 +129,36 @@ def deposit(request):
             print(form.fields)
     else:
         form = DepositForm()
-    # user's current balance goes here
-    #print(Customers.objects.get(pk=request.user.id).balance)
     context = {
         'balance': customer.balance,
         'form': form
     }
     return render(request, 'restaurant/deposit.html', context)
 
-'''def discussion_board(request):
-    context = {
-        'posts': Post.objects.all()
-    }
-    return render(request, 'restaurant/discussion_board.html', context)'''
-
+"""
+Class-based ListView for the discussion board.
+"""
 class DiscussionBoardView(ListView):
     model = Post
     template_name = 'restaurant/discussion_board.html'
     context_object_name = 'posts'
     ordering = ['-time_posted']
 
+"""
+Function-based view for the home page.
+"""
 def home(request):
     return render(request, 'restaurant/main_page.html')
 
+"""
+Function-based view for the user login page.
+"""
 def login(request):
     return render(request, 'restaurant/login.html')
 
-#make_post() was turned into a class-based view.
-'''@login_required
-def make_post(request):
-    customer = Customer.objects.get(pk=request.user.id)
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your post has been created!")
-            return redirect('discussion_board')
-    else:
-        form = PostForm()
-    return render(request, 'restaurant/make_post.html', {'form': form})'''
-
+"""
+Class-based DetailView for viewing a specific post on the discussion board.
+"""
 class SpecificPostView(DetailView):
     model = Post
     context_object_name = 'post'
@@ -173,6 +177,9 @@ def filter_taboo_words(text):
 
     return ' '.join(split_text), total_taboo_words
 
+"""
+Class-based CreateView for creating a post on the discussion board.
+"""
 class CreatePostView(CreateView):
     model = Post
     template_name = 'restaurant/make_post.html'
@@ -348,6 +355,10 @@ def add_to_cart(request):
         menu_item.save()
         return redirect('menu')
 
+"""
+Function-based view for removing to cart. This is called every time the "Remove from Cart" option is pressed.
+The user is just redirected back to the menu page with the updated cart.
+"""
 @login_required
 def remove_from_cart(request):
     """
