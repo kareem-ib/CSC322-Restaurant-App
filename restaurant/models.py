@@ -22,22 +22,6 @@ TAG_CHOICES = (
     ('D', 'Desserts')
 )
 
-SENDER_CHOICES = (
-    ('C', 'Customer'),
-    ('DP', 'Delivery Person')
-)
-
-RECIPIENT_CHOICES = (
-    ('C', 'Customer'),
-    ('DP', 'Delivery Person'),
-    ('CH', 'Chef')
-)
-
-CC_CHOICES = (
-    ('CA', 'Complaint'),
-    ('CI', 'Compliment')
-)
-
 class Customer(User):
     balance = models.DecimalField(max_digits=25, decimal_places=2, default=0.0)
     warnings = models.IntegerField(default=0)
@@ -108,14 +92,6 @@ class Staff(User):
     class Meta:
         abstract = True
 
-"""class ChefManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, *kwargs).filter(type=Staff.Types.CHEF)
-
-    def create(self, **kwargs):
-        kwargs.update({"type": "CHEF"})
-        return super(ChefManager, self).create(**kwargs)"""
-
 class Chef(Staff):
     #objects = ChefManager()
 
@@ -158,13 +134,6 @@ class Chef(Staff):
 
     class Meta:
         permissions = [('has_desig_chef', 'Has Designated chef permission')]
-
-"""class DeliveryPersonManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, *kwargs).filter(Staff.Types.DP)
-    def create(self, **kwargs):
-        kwargs.update({"type": "DP"})
-        return super(DeliveryPersonManager, self).create(**kwargs)"""
 
 class DeliveryPerson(Staff):
     #objects = DeliveryPersonManager()
@@ -211,12 +180,6 @@ class Deposit(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
-    class PaymentType(models.TextChoices):
-        CARD = 'CARD', _('Credit Card')
-        CRYPTO = 'CRYPTO', _('Cryptocurrency')
-
-    payment_type = models.CharField(max_length=6, choices=PaymentType.choices, default=PaymentType.CARD)
-
 class Dish(models.Model):
     name = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=6, decimal_places=2)
@@ -255,17 +218,6 @@ class MenuItems(models.Model):
         print('sdgsdgsdgsdgsd')
         self.item.last_ordered_date = timezone.now()
         self.item.save()
-
-
-"""class Cart(models.Model):
-    customer = models.OneToOneField(Customer, primary_key=True, on_delete=models.CASCADE)
-    dishes = models.ManyToManyField(MenuItems)
-
-    def get_running_cost(self):
-        cost = 0
-        for dish in self.dishes.all():
-            cost += dish.item.cost * dish.quantity
-        return cost"""
 
 class Orders(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
