@@ -247,6 +247,18 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', kwargs={'pk': self.pk})
 
+
+class Comment(models.Model):
+    author = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    time_posted = models.DateTimeField(default=timezone.now)
+    body = models.TextField(max_length=2000)
+    post = models.ForeignKey(Post, max_length=280, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-time_posted']
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+
 class TabooWords(models.Model):
     word = models.CharField(max_length=50)
 
