@@ -620,7 +620,7 @@ class CreateReportView(CreateView):
     # Overrides the form_valid() function
     def form_valid(self, form):
         form.instance.snitch = Customer.objects.get(pk=self.request.user.id)
-        form.instance.complainee = Customer.objects.get(pk=Post.objects.get(pk=self.kwargs['pk']).author)
+        form.instance.complainee = Customer.objects.get(pk=self.kwargs['pk'])
         messages.success(self.request, "Your report has been received!")
         return super().form_valid(form)
 
