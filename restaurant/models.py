@@ -226,7 +226,7 @@ class Dish(models.Model):
     tag = models.CharField(choices=TAG_CHOICES, max_length=2)
     image = models.ImageField(upload_to='img')
     last_ordered_date = models.DateTimeField(default=timezone.now)
-    #num_of_orders = models.IntegerField(default=0)
+    num_of_orders = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

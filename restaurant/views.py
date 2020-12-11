@@ -208,23 +208,31 @@ class MenuListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sorted_dishes = []
+        cart = []
+        # Check if user is authenticated, if not show defautls
+        if self.request.user.is_authenticated:
+            cust = Customer.get_customer(self.request.user)
+            for item in cust.menuitems_set.all():
+                cart.append({'item': item.item.name,
+                'price': item.quantity * item.item.price,
+                'quantity': item.quantity,
+                'tag': item.item.tag})
+            context['cart'] = cart
+            context['is_VIP'] = cust.is_VIP
+        else:
+            top_3_ordered = Dish.objects.all().order_by('-num_of_orders')[0:3]
+            top_3_rated = Dish.objects.all().order_by('-avg_ratings')[0:3]
+            
+            sorted_dishes.append(('Featured', [list(top_3_ordered), list(top_3_rated)]))
+        
         for tag in TAG_CHOICES:
             dish_tag_list = Dish.objects.filter(tag=tag[0])
             # We want 3 items per slide
             n = 3
             divided_list = [dish_tag_list[i:i + n] for i in range(0, len(dish_tag_list), n)]
             sorted_dishes.append((tag[1], divided_list))
+        
         context['sorted_dishes'] = sorted_dishes
-        cart = []
-        # Check if user is authenticated, if not show defautls
-        cust = Customer.get_customer(self.request.user)
-        for item in cust.menuitems_set.all():
-            cart.append({'item': item.item.name,
-            'price': item.quantity * item.item.price,
-            'quantity': item.quantity,
-            'tag': item.item.tag})
-        context['cart'] = cart
-        context['is_VIP'] = cust.is_VIP
         return context
 
 @login_required
