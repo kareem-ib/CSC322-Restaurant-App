@@ -10,7 +10,7 @@
       <br />
       <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;"><strong>Description: </strong>{{ dish.description }}</p>
       <p class="article-content text-break text-justify" style="max-width: 700px; word-wrap: break-word;"><strong>Price: </strong>${{ dish.price }}</p>
-      <p class="article-content text-break text-justify"><strong>Rating: </strong><a href="#">{{ dish.avg_ratings }}/5.0</a><small class="text-muted"> {{ dish.total_ratings }} ratings</small></p>
+      <p class="article-content text-break text-justify"><strong>Rating: </strong><a href="{% url 'rate' dish.pk %}">{{ dish.avg_ratings }}/5.0</a><small class="text-muted"> {{ dish.total_ratings }} ratings</small></p>
     </div>
   </article>
 {% endblock content %}

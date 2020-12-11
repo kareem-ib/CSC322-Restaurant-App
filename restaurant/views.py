@@ -221,7 +221,7 @@ class MenuListView(ListView):
                 'tag': item.item.tag})
             context['cart'] = cart
             context['is_VIP'] = cust.is_VIP
-        
+
         # If a customer has more than 3 orders, then we retrieve the customers top 3
         # ordered tags and return the highest rating of each tag category to be featured
         if user.is_authenticated and Customer.is_customer(user) and (len(user.customer.orders_set.all()) >= 3):
@@ -242,7 +242,7 @@ class MenuListView(ListView):
                 return tag
 
             highest_3_tags = [getpop() for i in range(3)]
-            
+
             featured_dishes = [*map(lambda x: Dish.objects.filter(tag=x).order_by('-avg_ratings').first(), highest_3_tags)]
             sorted_dishes.append(('Featured', [featured_dishes]))
         else:
@@ -251,7 +251,7 @@ class MenuListView(ListView):
 
             sorted_dishes.append(('Featured', [list(top_3_ordered), list(top_3_rated)]))
 
-        
+
         for tag in TAG_CHOICES:
             dish_tag_list = Dish.objects.filter(tag=tag[0])
             # We want 3 items per slide
@@ -267,23 +267,6 @@ class MenuDetailView(DetailView):
     context_object_name = 'dish'
 
 class RateCreateView(CreateView):
-    """model = Dish
-    template_name = 'restaurant/rate.html'
-    form_class = RatingForm
-
-    def get_success_url(self):
-        return reverse('menu')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-    def form_valid(self, form):
-        rating = DishForm.instance.rating
-        form.instance.total_ratings = F('total_ratings') + 1
-        form.instance.avg_ratings = (rating + F('avg_ratings')) / F('total_ratings')
-        messages.success(self.request, 'Your rating has been added!')
-        return super().form_valid(form)"""
-
     model = Rating
     template_name = 'restaurant/rate.html'
     fields = ['rating']
@@ -297,12 +280,17 @@ class RateCreateView(CreateView):
         return context
 
     def form_valid(self, form):
+        cust = Customer.objects.get(pk=self.request.user.id)
         rating = form.instance.rating
         form.instance.dish = Dish.objects.get(pk=self.kwargs['pk'])
         total_ratings = form.instance.dish.total_ratings
         avg_ratings = form.instance.dish.avg_ratings
-        form.instance.dish.total_ratings = total_ratings + 1
-        form.instance.dish.avg_ratings = (rating + avg_ratings*total_ratings) / form.instance.dish.total_ratings
+        if cust.is_VIP:
+            form.instance.dish.total_ratings = total_ratings + 2
+            form.instance.dish.avg_ratings = (2*rating + avg_ratings*total_ratings) / form.instance.dish.total_ratings
+        else:
+            form.instance.dish.total_ratings = total_ratings + 1
+            form.instance.dish.avg_ratings = (rating + avg_ratings*total_ratings) / form.instance.dish.total_ratings
         print(form.instance.dish.avg_ratings)
         form.instance.dish.save()
         messages.success(self.request, 'Your rating has been added!')
@@ -315,7 +303,7 @@ def add_to_cart(request):
     """
     print("On Windows, this function may give WinError10053, but it still works. Don't worry sm:)e.")
     if request.method == 'POST':
-        cust = Customer.objects.get(pk=request.user)
+        cust = Customer.objects.get(pk=request.user.id)
         # index 0 to just grab the Cart object instead of the tuple of (Cart, Boolean)
         cart = cust.menuitems_set
         dish_id = request.POST.get('dish_id')
