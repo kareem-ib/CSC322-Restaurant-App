@@ -584,7 +584,6 @@ def takeout(request):
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
-        cust.save()
         cust.check_vip()
         cust.menuitems_set.all().delete()
         return redirect(reverse('order_success'))
@@ -651,7 +650,6 @@ class DeliveryCreateView(CreateView):
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
-        cust.save()
         cust.check_vip()
         return super().form_valid(form)
 
@@ -716,7 +714,6 @@ class DineInCreateView(CreateView):
             cust.balance = F('balance') - cost * Decimal(0.9)
         else:
             cust.balance = F('balance') - cost
-        cust.save()
         cust.check_vip()
         return super().form_valid(form)
 
